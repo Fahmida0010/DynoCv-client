@@ -1,10 +1,12 @@
 import React, { useState, useContext } from 'react';
-import { useForm } from 'react-react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, Link } from 'react-router-dom';
-import { loginSchema, LoginInput } from '../schemas/auth.schema';
+import { loginSchema, type LoginInput } from '../schemas/auth.schema';
 import API from '../api/axios';
 import { AuthContext } from '../context/AuthContext';
+
+
 
 export const Login = () => {
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +29,7 @@ export const Login = () => {
   };
 
   const handleSocialLogin = (provider: 'google' | 'facebook') => {
-    window.location.href = `http://localhost:5000/api/auth/${provider}`;
+    window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/${provider}`;
   };
 
   return (

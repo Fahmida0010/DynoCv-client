@@ -2,17 +2,21 @@ import React, { useState, useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, Link } from 'react-router-dom';
-import { registerSchema, RegisterInput } from '../schemas/auth.schema';
+import { registerSchema, type RegisterInput } from '../schemas/auth.schema';
 import API from '../api/axios';
 import { AuthContext } from '../context/AuthContext';
 
 export const Register = () => {
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const auth = useContext(AuthContext);
   const navigate = useNavigate();
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
+    defaultValues: {
+      role: 'CANDIDATE'
+    }
   });
 
   const handleRegister = async (data: RegisterInput) => {
@@ -26,9 +30,8 @@ export const Register = () => {
     }
   };
 
-  // Social Login Handler (Mocking URL direction or SDK initialization)
   const handleSocialLogin = (provider: 'google' | 'facebook') => {
-    window.location.href = `http://localhost:5000/api/auth/${provider}`;
+    window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/${provider}`;
   };
 
   return (
@@ -39,6 +42,19 @@ export const Register = () => {
         {error && <div className="alert alert-danger p-2 small">{error}</div>}
 
         <form onSubmit={handleSubmit(handleRegister)}>
+          {/* Role Selection Option */}
+          <div className="mb-3">
+            <label className="form-label small fw-semibold">Join As</label>
+            <select
+              {...register('role')}
+              className={`form-select ${errors.role ? 'is-invalid' : ''}`}
+            >
+              <option value="CANDIDATE">Candidate (Looking for Job)</option>
+              <option value="RECRUITER">Recruiter (Hiring Talent)</option>
+            </select>
+            {errors.role && <div className="invalid-feedback small">{errors.role.message}</div>}
+          </div>
+
           <div className="row">
             <div className="col-md-6 mb-3">
               <label className="form-label small fw-semibold">First Name</label>
@@ -74,20 +90,31 @@ export const Register = () => {
             {errors.email && <div className="invalid-feedback small">{errors.email.message}</div>}
           </div>
 
+          {/* Password Group With Hide/Show Feature */}
           <div className="mb-4">
             <label className="form-label small fw-semibold">Password</label>
-            <input 
-              type="password" 
-              {...register('password')} 
-              className={`form-control ${errors.password ? 'is-invalid' : ''}`} 
-              placeholder="••••••••"
-            />
-            {errors.password && <div className="invalid-feedback small">{errors.password.message}</div>}
+            <div className="input-group">
+              <input 
+                type={showPassword ? 'text' : 'password'} 
+                {...register('password')} 
+                className={`form-control ${errors.password ? 'is-invalid' : ''}`} 
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{ borderTopRightRadius: '0.375rem', borderBottomRightRadius: '0.375rem' }}
+              >
+                <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
+              </button>
+              {errors.password && <div className="invalid-feedback small d-block">{errors.password.message}</div>}
+            </div>
           </div>
 
-          {/* Submit Button */}
+          {/* Dynamic Action Button Label Based on Runtime Role Input */}
           <button type="submit" disabled={isSubmitting} className="btn btn-primary w-100 fw-bold mb-3">
-            {isSubmitting ? 'Creating Account...' : 'Register as Candidate'}
+            {isSubmitting ? 'Creating Account...' : 'Register Account'}
           </button>
         </form>
 
@@ -96,7 +123,7 @@ export const Register = () => {
           <span className="position-absolute top-50 start-50 translate-middle bg-white px-2 text-muted small">Or Register with</span>
         </div>
 
-        {/* Social Login Buttons */}
+        {/* Social Login Buttons with Icons Embedded */}
         <div className="d-grid gap-2">
           <button 
             type="button" 
