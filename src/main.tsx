@@ -10,7 +10,12 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-      <RouterProvider router={router} />
 
+      {/* <RouterProvider router={router} /> */}
+ <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </QueryClientProvider>
   </StrictMode>,
 )

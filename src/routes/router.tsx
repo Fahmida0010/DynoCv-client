@@ -10,7 +10,7 @@ import { Login } from "../pages/Login";
 import {Register} from "../pages/Register";
 import Profile from "../pages/Profile";
 import DashboardLayout from "../layouts/DashboardLayout";
-import DashboardHome from "../pages/Dashboard/Common/DashboardHome";
+import DashboardHome from "../pages/Dashboard/common/DashboardHome";
 
 
 export const router = createBrowserRouter([

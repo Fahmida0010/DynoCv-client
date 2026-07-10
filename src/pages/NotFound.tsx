@@ -1,7 +1,6 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
-const NotFound: React.FC = () => {
+const NotFound = () => {
   const navigate = useNavigate();
 
   return (
@@ -9,14 +8,20 @@ const NotFound: React.FC = () => {
       <div className="row justify-content-center">
         <div className="col-md-6">
           <h1 className="display-1 fw-bold text-danger">404</h1>
+
           <h2 className="mb-3 fw-semibold">Page Not Found</h2>
+
           <p className="text-muted mb-4">
-            Oops! The page you are looking for doesn't exist or has been moved. 
-            If you just logged in via Google/Facebook, please check your route setup.
+            Oops! The page you are looking for doesn't exist or has been moved.
+            If you just logged in via Google/Facebook, please check your route
+            setup.
           </p>
-          <button 
-            className="btn btn-primary btn-lg shadow-sm px-4 me-2"
-            onClick={() => navigate('/')}
+
+          <button
+            className="btn btn-primary btn-lg shadow-sm px-4"
+            onClick={() => navigate("/")}
+          >
+            ← Back to Home
           </button>
         </div>
       </div>
@@ -24,4 +29,4 @@ const NotFound: React.FC = () => {
   );
 };
 
-export default NotFoundPage;
+export default NotFound;
