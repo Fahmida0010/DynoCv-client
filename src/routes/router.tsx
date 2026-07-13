@@ -8,9 +8,10 @@ import MainLayout from "../layouts/MainLayout";
 import Home from "../pages/Home";
 import { Login } from "../pages/Login";
 import {Register} from "../pages/Register";
-import Profile from "../pages/Profile";
 import DashboardLayout from "../layouts/DashboardLayout";
 import DashboardHome from "../pages/Dashboard/common/DashboardHome";
+import Profile from "../pages/Dashboard/common/profile";
+import { SocialSuccess } from "../pages/SocialSuccess";
 
 
 export const router = createBrowserRouter([
@@ -23,10 +24,7 @@ export const router = createBrowserRouter([
                 index: true,
                 element: <Home />
             },
-              {
-                path: "profile",
-                element: <Profile/>
-            },
+             
 
             {
                 path: "login",
@@ -37,6 +35,9 @@ export const router = createBrowserRouter([
                 path: "register",
                 element: <Register/>
             },
+ { path:"oauth-success",
+     element :<SocialSuccess />
+    },
 
         ]
     },
@@ -50,6 +51,11 @@ export const router = createBrowserRouter([
         index: true,
         element: <DashboardHome/>,
       },
+        {
+                path: "profile",
+                element: <Profile/>
+              },
+     
         ]
     }
 

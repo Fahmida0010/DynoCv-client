@@ -1,34 +1,53 @@
 import React, { useState, useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useNavigate, Link } from 'react-router-dom';
 import { registerSchema, type RegisterInput } from '../schemas/auth.schema';
-import API from '../api/axios';
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext, useAuth } from '../context/AuthContext';
+import useAxiosSecure from '../hooks/useAxiossecure';
+import { useMutation } from "@tanstack/react-query";
+import { Link, useNavigate } from 'react-router-dom';
+
+
 
 export const Register = () => {
+  
+const axiosSecure = useAxiosSecure();
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const auth = useContext(AuthContext);
   const navigate = useNavigate();
+  const auth = useAuth();
+  
+const registerMutation = useMutation({
+  mutationFn: async (data: RegisterInput) => {
+    const res = await axiosSecure.post("/auth/register", data);
+    return res.data;
+  },
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<RegisterInput>({
+  onSuccess: (data) => {
+    auth.login(data.access_token, data.user);
+    navigate("/dashboard/profile");
+  },
+
+  onError: (err: any) => {
+    setError(
+      err.response?.data?.message ??
+      "Registration failed. Try again."
+    );
+  },
+});
+
+  const { register, handleSubmit, formState: { errors} 
+} = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       role: 'CANDIDATE'
     }
   });
 
-  const handleRegister = async (data: RegisterInput) => {
-    try {
-      setError(null);
-      const response = await API.post('/auth/register', data);
-      auth?.login(response.data.access_token, response.data.user);
-      navigate('/profile');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Try again.');
-    }
-  };
+ const handleRegister = (data: RegisterInput) => {
+  setError(null);
+  registerMutation.mutate(data);
+};
 
   const handleSocialLogin = (provider: 'google' | 'facebook') => {
     window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/${provider}`;
@@ -113,8 +132,8 @@ export const Register = () => {
           </div>
 
           {/* Dynamic Action Button Label Based on Runtime Role Input */}
-          <button type="submit" disabled={isSubmitting} className="btn btn-primary w-100 fw-bold mb-3">
-            {isSubmitting ? 'Creating Account...' : 'Register Account'}
+          <button type="submit" disabled={registerMutation.isPending} className="btn btn-primary w-100 fw-bold mb-3">
+            {registerMutation.isPending ? 'Creating Account...' : 'Register Account'}
           </button>
         </form>
 

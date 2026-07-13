@@ -9,7 +9,7 @@ const axiosSecure = axios.create({
 });
 
 export const useAxiosSecure = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const { logout } = useAuth();
 
   // Request Interceptor: প্রতি রিকোয়েস্টে JWT টোকেন হেডার হিসেবে পাঠানো

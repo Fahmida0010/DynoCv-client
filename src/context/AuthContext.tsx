@@ -1,4 +1,6 @@
 import React, { createContext, useState,useEffect, type ReactNode ,useContext} from "react";
+import Loader from "../components/Loader/loading";
+
 
 interface User {
   id: string;
@@ -48,7 +50,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider value={{ user, token, login, logout, loading }}>
-      {!loading && children}
+      {loading ? <Loader/> : children}
     </AuthContext.Provider>
   );
 };

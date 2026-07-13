@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { HiMenuAlt3, HiX } from "react-icons/hi";
 import { 
   FaUser, FaBriefcase, FaFileAlt, FaList, FaComments, 
-  FaDatabase, FaPlusCircle, FaUsers, FaChartPie, FaCog, FaHome 
+  FaDatabase, FaPlusCircle, FaUsers, FaChartPie, FaCog 
 } from "react-icons/fa";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
@@ -12,47 +12,55 @@ import Footer from "../components/Footer/Footer";
 import useAxiosSecure from "../hooks/useAxiossecure";
 import Loading from "../components/Loader/loading";
 
-const DashboardLayout = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+interface MenuItem {
+  label: string;
+  path: string;
+  icon: React.ReactNode;
+}
+
+interface DBUser {
+  role: "CANDIDATE" | "RECRUITER" | "ADMIN";
+  email: string;
+  firstName?: string; 
+  lastName?: string; 
+  [key: string]: any;
+}
+
+const DashboardLayout: React.FC = () => {
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const axiosSecure = useAxiosSecure();
 
-  // ১. ডাটাবেজ থেকে ইউজারের রোল এবং ডিটেইলস ফেচ করা
-  const { data: dbUser, isLoading } = useQuery({
+  // ডাটাবেজ থেকে ইউজারের রোল এবং ডিটেইলস ফেচ করা
+  const { data: dbUser, isLoading } = useQuery<DBUser>({
     queryKey: ["dbUser", user?.email],
     enabled: !!user?.email && !loading,
     queryFn: async () => {
-      const res = await useAxiosSecure.get(`/users/${user.email}`);
+      const res = await axiosSecure.get(`/auth/users/${user.email}`);
       return res.data;
     },
   });
 
-  const role = dbUser?.role; // candidate, recruiter, admin
+  const role = dbUser?.role;
+  
+  const firstName = dbUser?.firstName || dbUser?.firstName || user?.firstName || user?.email?.split('@')[0] || "User";
 
-  // ২. রিডাইরেক্ট লজিক (রোল অনুযায়ী হোম পেজে পাঠানো)
+  // রিডাইরেক্ট প্রোটেকশন
   useEffect(() => {
     if (loading || isLoading) return;
     if (!user) {
       navigate("/login", { replace: true });
-      return;
     }
-
-    if (location.pathname === "/dashboard") {
-      if (role === "candidate") navigate("/dashboard/candidate/profile", { replace: true });
-      else if (role === "recruiter") navigate("/dashboard/recruiter/positions", { replace: true });
-      else if (role === "admin") navigate("/dashboard/admin/statistics", { replace: true });
-    }
-  }, [user, loading, isLoading, role, location.pathname, navigate]);
+  }, [user, loading, isLoading, navigate]);
 
   if (loading || isLoading) return <Loading />;
   if (!user) return null;
 
-  // ৩. মেনু আইটেম সেটআপ (প্রোজেক্ট রিকোয়ারমেন্ট অনুযায়ী)
-
-  // ক্যান্ডিডেট মেনু
-  const candidateMenu = [
-    { label: "Profile (Me)", path: "/dashboard/candidate/profile", icon: <FaUser /> },
+  // মেনু আইটেম সেটআপ
+  const candidateMenu: MenuItem[] = [
+    { label: "Profile", path: "/dashboard/profile", icon: <FaUser /> },
     { label: "My Attributes", path: "/dashboard/candidate/attributes", icon: <FaList /> },
     { label: "Projects", path: "/dashboard/candidate/projects", icon: <FaBriefcase /> },
     { label: "My CVs", path: "/dashboard/candidate/my-cvs", icon: <FaFileAlt /> },
@@ -60,8 +68,8 @@ const DashboardLayout = () => {
     { label: "Discussions", path: "/dashboard/candidate/discussions", icon: <FaComments /> },
   ];
 
-  // রিক্রুটার মেনু
-  const recruiterMenu = [
+  const recruiterMenu: MenuItem[] = [
+    { label: "My Profile", path: "/dashboard/profile", icon: <FaUser /> },
     { label: "Positions", path: "/dashboard/recruiter/positions", icon: <FaBriefcase /> },
     { label: "Create Position", path: "/dashboard/recruiter/create-position", icon: <FaPlusCircle /> },
     { label: "Attribute Library", path: "/dashboard/recruiter/attribute-library", icon: <FaDatabase /> },
@@ -69,90 +77,121 @@ const DashboardLayout = () => {
     { label: "Discussions", path: "/dashboard/recruiter/discussions", icon: <FaComments /> },
   ];
 
-  // এডমিন মেনু
-  const adminMenu = [
+  const adminMenu: MenuItem[] = [
+    { label: "My Profile ", path: "/dashboard/profile", icon: <FaUser /> },
     { label: "Statistics", path: "/dashboard/admin/statistics", icon: <FaChartPie /> },
     { label: "Manage Users", path: "/dashboard/admin/users", icon: <FaUsers /> },
     { label: "All CVs", path: "/dashboard/admin/all-cvs", icon: <FaFileAlt /> },
     { label: "System Settings", path: "/dashboard/admin/settings", icon: <FaCog /> },
   ];
 
-  // রোল অনুযায়ী মেনু ফিল্টার করা
-  let menuItems = [];
-  if (role === "candidate") menuItems = candidateMenu;
-  else if (role === "recruiter") menuItems = recruiterMenu;
-  else if (role === "admin") menuItems = adminMenu;
+  let menuItems: MenuItem[] = [];
+  if (role === "CANDIDATE") menuItems = candidateMenu;
+  else if (role === "RECRUITER") menuItems = recruiterMenu;
+  else if (role === "ADMIN") menuItems = adminMenu;
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100 font-sans">
+    <div className="d-flex flex-column min-vh-screen bg-light">
       <Navbar />
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* সাইডবার */}
-        <aside 
-          className={`${
-            sidebarOpen ? "w-72" : "w-20"
-          } bg-slate-900 text-slate-300 transition-all duration-300 flex flex-col shadow-xl z-20`}
+      {/* মোবাইল ডিভাইসের জন্য ফ্লোটিং টগল বাটন */}
+      <div className="d-md-none p-3 bg-white border-bottom d-flex justify-content-between align-items-center">
+        <h5 className="m-0 fw-bold text-dark text-capitalize">
+          {location.pathname.split("/").pop()?.replace("-", " ") || "Dashboard"}
+        </h5>
+        <button 
+          onClick={() => setSidebarOpen(!sidebarOpen)} 
+          className="btn btn-outline-dark p-2"
         >
-          {/* সাইডবার টগল বাটন */}
-          <div className="p-4 flex justify-between items-center border-b border-slate-800">
-            {sidebarOpen && <span className="font-bold text-white tracking-wider">DynoCV Dashboard</span>}
+          {sidebarOpen ? <HiX size={22} /> : <HiMenuAlt3 size={22} />}
+        </button>
+      </div>
+
+      <div className="d-flex flex-grow-1 position-relative">
+        
+        {/* সাইডবার (aside) */}
+        <aside 
+          className={`bg-white text-dark d-flex flex-column shadow ${
+            sidebarOpen ? "d-flex" : "d-none d-md-flex"
+          }`}
+          style={{
+            width: sidebarOpen ? "280px" : "80px",
+            transition: "width 0.3s ease",
+            minHeight: "calc(100vh - 56px)",
+            zIndex: 1040
+          }}
+        >
+          {/* সাইডবার হেডার (ডেস্কটপ মোডে টগল বাটন) */}
+          <div className="p-3 d-none d-md-flex justify-content-between align-items-center border-bottom border-light">
+            {sidebarOpen && <span className="fw-bold text-primary  tracking-wider">Dashboard</span>}
             <button 
               onClick={() => setSidebarOpen(!sidebarOpen)} 
-              className="p-2 hover:bg-slate-800 rounded-lg transition-colors ml-auto"
+              className="btn btn-link text-dark p-1 ms-auto text-decoration-none"
             >
               {sidebarOpen ? <HiX size={20} /> : <HiMenuAlt3 size={20} />}
             </button>
           </div>
 
-          {/* মেনু লিস্ট */}
-          <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1 custom-scrollbar">
-            {menuItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center gap-4 p-3 rounded-lg transition-all duration-200 group ${
-                  location.pathname === item.path 
-                    ? "bg-blue-600 text-white shadow-lg" 
-                    : "hover:bg-slate-800 hover:text-white"
-                }`}
-              >
-                <span className={`text-xl ${location.pathname === item.path ? "text-white" : "group-hover:text-blue-400"}`}>
-                  {item.icon}
-                </span>
-                {sidebarOpen && <span className="font-medium">{item.label}</span>}
-              </Link>
-            ))}
+          {/* নেভিগেশন মেনু */}
+          <nav className="flex-grow-1 overflow-auto py-3 px-2">
+            <ul className="nav nav-pills flex-column gap-2 list-unstyled">
+              {menuItems.map((item) => {
+                const isActive = location.pathname === item.path;
+                return (
+                  <li key={item.path}>
+                    <Link
+                      to={item.path}
+                      onClick={() => {
+                        if(window.innerWidth < 768) setSidebarOpen(false);
+                      }}
+                      className={`nav-link d-flex align-items-center gap-3 px-3 py-2.5 rounded text-decoration-none transition-all ${
+                        isActive ? "active bg-primary text-white shadow-lg" : "text-secondary hover-bg-custom"
+                      }`}
+                    >
+                      <span className={`fs-5 d-flex align-items-center ${isActive ? "text-white" : "text-secondary"}`}>
+                        {item.icon}
+                      </span>
+                      {sidebarOpen && <span className={`fw-medium ${isActive ? "text-white" : "text-dark"}`}>{item.label}</span>}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
           </nav>
 
-          {/* ইউজার ইনফো (নিচে) */}
+          {/* ইউজার প্রোফাইল ফুটনোট */}
           {sidebarOpen && (
-            <div className="p-4 border-t border-slate-800 bg-slate-900/50">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white">
-                  {user?.displayName?.charAt(0) || role?.charAt(0).toUpperCase()}
+            <div className="p-3 border-top border-light bg-light mt-auto">
+              <div className="d-flex align-items-center gap-3">
+                <div 
+                  className="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold fs-5"
+                  style={{ width: "45px", height: "45px", minWidth: "45px" }}
+                >
+                  {firstName.charAt(0).toUpperCase()}
                 </div>
                 <div className="overflow-hidden">
-                  <p className="text-sm font-semibold text-white truncate">{user?.displayName || "User"}</p>
-                  <p className="text-xs text-slate-500 capitalize">{role}</p>
+                  {/* ফিক্সড ডাইনামিক নেম */}
+                  <p className="m-0 text-sm fw-bold text-dark text-truncate">{firstName}</p>
+                  <p className="m-0 text-xs text-muted text-capitalize">{role}</p>
                 </div>
               </div>
             </div>
           )}
         </aside>
 
-        {/* মেইন কন্টেন্ট এরিয়া */}
-        <main className="flex-1 overflow-y-auto bg-slate-50 p-4 md:p-8">
-          <div className="max-w-7xl mx-auto">
-            {/* ব্রেডক্রাম্ব বা হেডার এখানে যোগ করতে পারেন */}
-            <div className="mb-6">
-               <h1 className="text-2xl font-bold text-slate-800 capitalize">
-                 {location.pathname.split("/").pop()?.replace("-", " ")}
-               </h1>
+        {/* মেইন কন্টেন্ট এরিয়া */}
+        <main className="flex-grow-1 p-3 p-md-5 bg-light overflow-auto">
+          <div className="container-fluid">
+            
+            {/* পেজ টাইটেল হেডার */}
+            <div className="d-none d-md-block mb-4">
+               <h2 className="fw-bold text-dark text-capitalize m-0">
+                 {location.pathname.split("/").pop()?.replace("-", " ") || "Dashboard"}
+               </h2>
             </div>
             
-            {/* সাব-পেজগুলো এখানে রেন্ডার হবে */}
-            <div className="bg-white rounded-xl shadow-sm min-h-[calc(100vh-200px)] p-6">
+            {/* চাইল্ড কম্পোনেন্ট রেন্ডারিং এরিয়া */}
+            <div className="bg-white rounded shadow-sm p-4" style={{ minHeight: "calc(100vh - 240px)" }}>
               <Outlet />
             </div>
           </div>
@@ -160,6 +199,14 @@ const DashboardLayout = () => {
       </div>
 
       <Footer />
+
+      {/* কাস্টম সিএসএস হোভার স্টাইল */}
+      <style>{`
+        .hover-bg-custom:hover {
+          background-color: rgba(0, 0, 0, 0.05) !important;
+          color: #000000 !important;
+        }
+      `}</style>
     </div>
   );
 };

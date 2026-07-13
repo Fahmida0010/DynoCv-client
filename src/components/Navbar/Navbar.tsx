@@ -1,96 +1,60 @@
-import { Link, NavLink } from "react-router-dom";
-import { useState } from "react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import Logo from "../Logo/Logo";
-
-type User = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: string;
-  photo?: string;
-};
+import { useAuth } from "../../context/AuthContext";
 
 const Navbar = () => {
-  // Replace with Auth Context
-  const [user, setUser] = useState<User | null>({
-    firstName: "Fahmida",
-    lastName: "Akter",
-    email: "fahmida@gmail.com",
-    role: "CANDIDATE",
-    photo: "",
-  });
+  const { user, logout } = useAuth(); 
+  const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    setUser(null);
+    logout(); 
+    navigate("/login"); 
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
-      <div className="container">
-
+    <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top py-2">
+      {/* 🟢 container er bodle container-fluid babohar kora hoyeche */}
+      {/* 🟢 px-lg-5 jog kora hoyeche jate ekdom gayer sathe lege na thake, dekhte premium lage */}
+      <div className="container-fluid px-4 px-lg-5">
+        
+        {/* Logo */}
         <Logo />
 
+        {/* Mobile Toggler Button */}
         <button
           className="navbar-toggler"
           type="button"
-          data-bs-toggle="collapse"
+          data-bs-toggle="collapse" 
           data-bs-target="#mainNavbar"
           aria-controls="mainNavbar"
           aria-expanded="false"
           aria-label="Toggle navigation"
         >
           <span className="navbar-toggler-icon"></span>
-        </button>
+        </button>.
 
-        <div
-          className="collapse navbar-collapse"
-          id="mainNavbar"
-        >
-
-          <ul className="navbar-nav mx-auto text-center">
-
+        {/* Navbar Content */}
+        <div className="collapse navbar-collapse" id="mainNavbar">
+          <ul className="navbar-nav ms-lg-5 me-auto text-center mb-3 mb-lg-0 fw-medium">
             <li className="nav-item">
-              <NavLink className="nav-link" to="/">
-                Home
-              </NavLink>
+              <NavLink className="nav-link" to="/">Home</NavLink>
             </li>
-
             <li className="nav-item">
-              <NavLink className="nav-link" to="/positions">
-                Positions
-              </NavLink>
+              <NavLink className="nav-link" to="/positions">Positions</NavLink>
             </li>
-
             <li className="nav-item">
-              <NavLink className="nav-link" to="/about">
-                About
-              </NavLink>
+              <NavLink className="nav-link" to="/about">About</NavLink>
             </li>
-
           </ul>
 
+          {/* User Conditional Buttons */}
           {!user ? (
-            <div className="d-flex flex-column flex-lg-row gap-2 mt-3 mt-lg-0">
-
-              <Link
-                to="/login"
-                className="btn btn-outline-primary"
-              >
-                Login
-              </Link>
-
-              <Link
-                to="/register"
-                className="btn btn-primary"
-              >
-                Register
-              </Link>
-
+            <div className="d-flex flex-column flex-lg-row gap-2 mb-3 mb-lg-0 justify-content-center">
+              <Link to="/login" className="btn btn-outline-primary px-4">Login</Link>
+              <Link to="/register" className="btn btn-primary px-4">Register</Link>
             </div>
           ) : (
-            <div className="dropdown d-flex justify-content-center justify-content-lg-end mt-3 mt-lg-0">
-
+            <div className="dropdown d-flex justify-content-center justify-content-lg-end mb-3 mb-lg-0">
               <button
                 type="button"
                 className="btn p-0 border-0 bg-transparent dropdown-toggle"
@@ -98,77 +62,33 @@ const Navbar = () => {
                 aria-expanded="false"
               >
                 {user.photo ? (
-                  <img
-                    src={user.photo}
-                    alt="Profile"
-                    className="rounded-circle"
-                    width="45"
-                    height="45"
-                  />
+                  <img src={user.photo} alt="Profile" className="rounded-circle" width="42" height="42" />
                 ) : (
                   <div
                     className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
-                    style={{
-                      width: "45px",
-                      height: "45px",
-                      fontWeight: "bold",
-                      fontSize: "18px",
-                    }}
+                    style={{ width: "42px", height: "42px", fontWeight: "bold", fontSize: "16px" }}
                   >
-                    {user.firstName.charAt(0)}
+                    {user.firstName?.charAt(0) || "U"} 
                   </div>
                 )}
               </button>
 
-              <ul
-                className="dropdown-menu dropdown-menu-end shadow"
-                style={{ minWidth: "260px" }}
-              >
+              <ul className="dropdown-menu dropdown-menu-end shadow border-0" style={{ minWidth: "260px" }}>
                 <li className="px-3 py-3">
-                  <h6 className="mb-1">
-                    {user.firstName} {user.lastName}
-                  </h6>
-
-                  <small className="text-muted">
-                    {user.email}
-                  </small>
-
-                  <div className="mt-2">
-                    <span className="badge bg-primary">
-                      {user.role}
-                    </span>
-                  </div>
+                  <h6 className="mb-1">{user.firstName} {user.lastName}</h6>
+                  <small className="text-muted">{user.email}</small>
+                  <div className="mt-2"><span className="badge bg-primary">{user.role}</span></div>
                 </li>
-
+                <li><hr className="dropdown-divider" /></li>
+                  <li><Link to="/dashboard" className="dropdown-item">Dashboard</Link></li>
+                <li><Link to="/dashboard/profile" className="dropdown-item">My Profile</Link></li>
                 <li>
-                  <hr className="dropdown-divider" />
+                  <button className="dropdown-item text-danger" onClick={handleLogout}>Logout</button>
                 </li>
-
-                <li>
-                  <Link
-                    to="/profile"
-                    className="dropdown-item"
-                  >
-                    My Profile
-                  </Link>
-                </li>
-
-                <li>
-                  <button
-                    className="dropdown-item text-danger"
-                    onClick={handleLogout}
-                  >
-                    Logout
-                  </button>
-                </li>
-
               </ul>
-
             </div>
           )}
-
         </div>
-
       </div>
     </nav>
   );
