@@ -12,7 +12,7 @@ import { SocialSuccess } from "../pages/SocialSuccess";
 import { PrivateRoute } from "./PrivateRoute";
 import { AttributesPage } from "../pages/Dashboard/candidate/Attributespage";
 import { ProjectsPage } from "../pages/Dashboard/candidate/ProjectsPage";
-import Profile from "../pages/Dashboard/Common/profile";
+import Profile from "../pages/Dashboard/Common/profile-temp";
 
 
 
