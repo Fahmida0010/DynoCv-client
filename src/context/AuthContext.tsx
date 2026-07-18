@@ -1,10 +1,13 @@
-import React, { createContext, useState,useEffect, type ReactNode ,useContext} from "react";
+import React, { createContext, useState,useEffect, type ReactNode} from "react";
 import Loader from "../components/Loader/loading";
 
 
 interface User {
   id: string;
   email: string;
+  firstName?: string;  
+  lastName?: string;   
+  photo?: string;     
   role: 'CANDIDATE' | 'RECRUITER' | 'ADMIN';
 }
 

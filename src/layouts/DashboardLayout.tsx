@@ -23,6 +23,7 @@ interface DBUser {
   email: string;
   firstName?: string; 
   lastName?: string; 
+  photo?: string;     
   [key: string]: any;
 }
 
@@ -38,7 +39,7 @@ const DashboardLayout: React.FC = () => {
     queryKey: ["dbUser", user?.email],
     enabled: !!user?.email && !loading,
     queryFn: async () => {
-      const res = await axiosSecure.get(`/auth/users/${user.email}`);
+      const res = await axiosSecure.get(`/auth/users/${user?.email}`);
       console.log("API Response:", res.data);
       return res.data;
     },

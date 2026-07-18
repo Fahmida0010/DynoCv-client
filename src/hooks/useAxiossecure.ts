@@ -1,6 +1,7 @@
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+
 
 
 const axiosSecure = axios.create({
@@ -9,10 +10,10 @@ const axiosSecure = axios.create({
 });
 
 export const useAxiosSecure = () => {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const { logout } = useAuth();
 
-  // Request Interceptor: প্রতি রিকোয়েস্টে JWT টোকেন হেডার হিসেবে পাঠানো
+
   axiosSecure.interceptors.request.use(
     (config) => {
       const token = localStorage.getItem("dynocv_token");

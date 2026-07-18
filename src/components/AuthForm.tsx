@@ -1,7 +1,6 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { LoginInput, RegisterInput } from '../schemas/auth.schema';
 
 interface AuthFormProps {
   type: 'login' | 'register';

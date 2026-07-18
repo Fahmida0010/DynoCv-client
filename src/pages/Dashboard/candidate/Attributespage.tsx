@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
-import { useForm } from 'react-hook-form';
 
 interface AttributeProps {
   id: string;
@@ -30,7 +29,7 @@ export const AttributesPage: React.FC = () => {
       
       // Update new version token received from server response
       setAttributes(prev => prev.map(attr => 
-        attr.attributeId === attributeId ? { ...attr, version: response.data.version, value: newValue } : attr
+        attr.id === attributeId ? { ...attr, version: response.data.version, value: newValue } : attr
       ));
       setSaveStatus('Saved');
     } catch (err: any) {
