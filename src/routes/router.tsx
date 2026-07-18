@@ -8,11 +8,11 @@ import Home from "../pages/Home";
 import { Login } from "../pages/Login";
 import { Register } from "../pages/Register";
 import DashboardLayout from "../layouts/DashboardLayout";
-import Profile from "../pages/Dashboard/common/profile";
 import { SocialSuccess } from "../pages/SocialSuccess";
 import { PrivateRoute } from "./PrivateRoute";
 import { AttributesPage } from "../pages/Dashboard/candidate/Attributespage";
 import { ProjectsPage } from "../pages/Dashboard/candidate/ProjectsPage";
+import Profile from "../pages/Dashboard/Common/profile";
 
 
 
