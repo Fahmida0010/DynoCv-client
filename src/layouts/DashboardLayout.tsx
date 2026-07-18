@@ -71,6 +71,7 @@ const DashboardLayout: React.FC = () => {
     { label: "My CVs", path: "/dashboard/my-cvs", icon: <FaFileAlt /> },
     { label: "Available Positions", path: "/dashboard/available-positions", icon: <FaList /> },
     { label: "Discussions", path: "/dashboard/discussions", icon: <FaComments /> },
+      { label: "Settings", path: "/dashboard/settings", icon: <FaCog /> },
   ];
 
   const recruiterMenu: MenuItem[] = [
@@ -80,6 +81,7 @@ const DashboardLayout: React.FC = () => {
     { label: "Attribute Library", path: "/dashboard/attribute-library", icon: <FaDatabase /> },
     { label: "Candidate CVs", path: "/dashboard/candidate-cvs", icon: <FaFileAlt /> },
     { label: "Discussions", path: "/dashboard/discussions", icon: <FaComments /> },
+      { label: "Settings", path: "/dashboard/settings", icon: <FaCog /> },
   ];
 
   const adminMenu: MenuItem[] = [
@@ -87,7 +89,8 @@ const DashboardLayout: React.FC = () => {
     { label: "Statistics", path: "/dashboard/statistics", icon: <FaChartPie /> },
     { label: "Manage Users", path: "/dashboard/users", icon: <FaUsers /> },
     { label: "All CVs", path: "/dashboard/all-cvs", icon: <FaFileAlt /> },
-    { label: "System Settings", path: "/dashboard/settings", icon: <FaCog /> },
+      { label: "Discussions", path: "/dashboard/discussions", icon: <FaComments /> },
+    { label: "Settings", path: "/dashboard/settings", icon: <FaCog /> },
   ];
 
   let menuItems: MenuItem[] = [];

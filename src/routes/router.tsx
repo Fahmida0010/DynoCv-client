@@ -13,6 +13,17 @@ import { PrivateRoute } from "./PrivateRoute";
 import { AttributesPage } from "../pages/Dashboard/candidate/Attributespage";
 import { ProjectsPage } from "../pages/Dashboard/candidate/ProjectsPage";
 import Profile from "../pages/Dashboard/Common/profile-temp";
+import { Discussions } from "../pages/Dashboard/Common/Discussions";
+import { MyCVs } from "../pages/Dashboard/candidate/MyCVs";
+import { AvailablePositions } from "../pages/Dashboard/candidate/AvailablePositions";
+import { Settings } from "../pages/Dashboard/Common/settings";
+import { Positions } from "../pages/Dashboard/recruiter/Positions";
+import { CreatePosition } from "../pages/Dashboard/recruiter/CreatePosition";
+import { AttributeLibrary } from "../pages/Dashboard/recruiter/AttributeLibrary";
+import { CandidateCVs } from "../pages/Dashboard/recruiter/CandidateCVs";
+import { Statistics } from "../pages/Dashboard/admin/Statistics";
+import { ManageUsers } from "../pages/Dashboard/admin/ManageUsers";
+import { AllCVs } from "../pages/Dashboard/admin/AllCVs";
 
 
 
@@ -51,7 +62,8 @@ export const router = createBrowserRouter([
             
             // ২. কমন পেজ (সবার প্রোফাইল পাথ এক)
             { path: "profile", element: <Profile /> },
-            // { path: "discussions", element: <DiscussionsPage /> }, 
+            { path: "discussions", element: <Discussions /> }, 
+             { path: "settings", element: <Settings /> },
 
             // ৩. CANDIDATE Protected Routes
             {
@@ -65,14 +77,14 @@ export const router = createBrowserRouter([
                         path: "projects",
                         element: <ProjectsPage />
                     },
-                    // {
-                    //     path: "my-cvs", 
-                    //     element: <MyCVsPage />
-                    // },
-                    // {
-                    //     path: "available-positions", 
-                    //     element: <AvailablePositionsPage />
-                    // },
+                    {
+                        path: "my-cvs", 
+                        element: <MyCVs />
+                    },
+                    {
+                        path: "available-positions", 
+                        element: <AvailablePositions/>
+                    },
                 ]
             },
 
@@ -80,22 +92,22 @@ export const router = createBrowserRouter([
             {
                 element: <PrivateRoute allowedRoles={["RECRUITER"]} />,
                 children: [
-                    // {
-                    //     path: "positions",
-                    //     element: <PositionsPage />
-                    // },
-                    // {
-                    //     path: "create-position",
-                    //     element: <CreatePositionPage />
-                    // },
-                    // {
-                    //     path: "attribute-library",
-                    //     element: <AttributeLibraryPage />
-                    // },
-                    // {
-                    //     path: "candidate-cvs",
-                    //     element: <CandidateCVsPage />
-                    // },
+                    {
+                        path: "positions",
+                        element: <Positions />
+                    },
+                    {
+                        path: "create-position",
+                        element: <CreatePosition/>
+                    },
+                    {
+                        path: "attribute-library",
+                        element: <AttributeLibrary />
+                    },
+                    {
+                        path: "candidate-cvs",
+                        element: <CandidateCVs />
+                    },
                 ]
             },
 
@@ -103,22 +115,19 @@ export const router = createBrowserRouter([
             {
                 element: <PrivateRoute allowedRoles={["ADMIN"]} />,
                 children: [
-                    // {
-                    //     path: "statistics",
-                    //     element: <StatisticsPage />
-                    // },
-                    // {
-                    //     path: "users",
-                    //     element: <ManageUsersPage />
-                    // },
-                    // {
-                    //     path: "all-cvs",
-                    //     element: <AllCVsPage />
-                    // },
-                    // {
-                    //     path: "settings",
-                    //     element: <SystemSettingsPage />
-                    // },
+                    {
+                        path: "statistics",
+                        element: <Statistics />
+                    },
+                    {
+                        path: "users",
+                        element: <ManageUsers/>
+                    },
+                    {
+                        path: "all-cvs",
+                        element: <AllCVs/>
+                    },
+                    
                 ]
             }
         ]
