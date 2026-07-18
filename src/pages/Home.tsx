@@ -1,4 +1,3 @@
-import Footer from "../components/Footer/Footer";
 import CTA from "../components/home/CTA";
 import FAQ from "../components/home/FAQ";
 import FeaturedJobs from "../components/home/FeaturedJobs";
@@ -29,7 +28,7 @@ const Home = () => {
 
       {/* FAQ */}
 
-      <Footer />
+  
     </>
   );
 };

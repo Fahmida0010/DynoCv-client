@@ -32,7 +32,7 @@ export const Login = () => {
 
     onSuccess: (data) => {
       auth?.login(data.access_token, data.user);
-      navigate("/dashboard/profile");
+      navigate("/dashboard");
     },
 
     onError: (err: any) => {

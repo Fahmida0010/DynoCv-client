@@ -9,8 +9,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar/Navbar";
 import Footer from "../components/Footer/Footer";
-import useAxiosSecure from "../hooks/useAxiossecure";
 import Loading from "../components/Loader/loading";
+import useAxiosSecure from "../hooks/useAxiossecure";
 
 interface MenuItem {
   label: string;
@@ -39,9 +39,12 @@ const DashboardLayout: React.FC = () => {
     enabled: !!user?.email && !loading,
     queryFn: async () => {
       const res = await axiosSecure.get(`/auth/users/${user.email}`);
+      console.log("API Response:", res.data);
       return res.data;
     },
   });
+
+  console.log("dbUser =", dbUser);
 
   const role = dbUser?.role;
   
@@ -60,29 +63,30 @@ const DashboardLayout: React.FC = () => {
 
   // মেনু আইটেম সেটআপ
   const candidateMenu: MenuItem[] = [
+    
     { label: "Profile", path: "/dashboard/profile", icon: <FaUser /> },
-    { label: "My Attributes", path: "/dashboard/candidate/attributes", icon: <FaList /> },
-    { label: "Projects", path: "/dashboard/candidate/projects", icon: <FaBriefcase /> },
-    { label: "My CVs", path: "/dashboard/candidate/my-cvs", icon: <FaFileAlt /> },
-    { label: "Available Positions", path: "/dashboard/candidate/available-positions", icon: <FaList /> },
-    { label: "Discussions", path: "/dashboard/candidate/discussions", icon: <FaComments /> },
+    { label: "My Attributes", path: "/dashboard/attributes", icon: <FaList /> },
+    { label: "Projects", path: "/dashboard/projects", icon: <FaBriefcase /> },
+    { label: "My CVs", path: "/dashboard/my-cvs", icon: <FaFileAlt /> },
+    { label: "Available Positions", path: "/dashboard/available-positions", icon: <FaList /> },
+    { label: "Discussions", path: "/dashboard/discussions", icon: <FaComments /> },
   ];
 
   const recruiterMenu: MenuItem[] = [
     { label: "My Profile", path: "/dashboard/profile", icon: <FaUser /> },
-    { label: "Positions", path: "/dashboard/recruiter/positions", icon: <FaBriefcase /> },
-    { label: "Create Position", path: "/dashboard/recruiter/create-position", icon: <FaPlusCircle /> },
-    { label: "Attribute Library", path: "/dashboard/recruiter/attribute-library", icon: <FaDatabase /> },
-    { label: "Candidate CVs", path: "/dashboard/recruiter/candidate-cvs", icon: <FaFileAlt /> },
-    { label: "Discussions", path: "/dashboard/recruiter/discussions", icon: <FaComments /> },
+    { label: "Positions", path: "/dashboard/positions", icon: <FaBriefcase /> },
+    { label: "Create Position", path: "/dashboard/create-position", icon: <FaPlusCircle /> },
+    { label: "Attribute Library", path: "/dashboard/attribute-library", icon: <FaDatabase /> },
+    { label: "Candidate CVs", path: "/dashboard/candidate-cvs", icon: <FaFileAlt /> },
+    { label: "Discussions", path: "/dashboard/discussions", icon: <FaComments /> },
   ];
 
   const adminMenu: MenuItem[] = [
     { label: "My Profile ", path: "/dashboard/profile", icon: <FaUser /> },
-    { label: "Statistics", path: "/dashboard/admin/statistics", icon: <FaChartPie /> },
-    { label: "Manage Users", path: "/dashboard/admin/users", icon: <FaUsers /> },
-    { label: "All CVs", path: "/dashboard/admin/all-cvs", icon: <FaFileAlt /> },
-    { label: "System Settings", path: "/dashboard/admin/settings", icon: <FaCog /> },
+    { label: "Statistics", path: "/dashboard/statistics", icon: <FaChartPie /> },
+    { label: "Manage Users", path: "/dashboard/users", icon: <FaUsers /> },
+    { label: "All CVs", path: "/dashboard/all-cvs", icon: <FaFileAlt /> },
+    { label: "System Settings", path: "/dashboard/settings", icon: <FaCog /> },
   ];
 
   let menuItems: MenuItem[] = [];
@@ -90,7 +94,12 @@ const DashboardLayout: React.FC = () => {
   else if (role === "RECRUITER") menuItems = recruiterMenu;
   else if (role === "ADMIN") menuItems = adminMenu;
 
+ console.log("Role:", role);
+console.log("Menu:", menuItems);
+
   return (
+
+     
     <div className="d-flex flex-column min-vh-screen bg-light">
       <Navbar />
 

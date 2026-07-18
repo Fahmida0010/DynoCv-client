@@ -19,3 +19,4 @@ export const PrivateRoute: React.FC<PrivateRouteProps> = ({ allowedRoles }) => {
 
   return <Outlet />;
 };
+
