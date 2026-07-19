@@ -101,10 +101,8 @@ const DashboardLayout: React.FC = () => {
  console.log("Role:", role);
 console.log("Menu:", menuItems);
 
-  return (
-
-     
-    <div className="d-flex flex-column min-vh-screen bg-light">
+return (
+    <div className="d-flex flex-column min-vh-100 bg-light">
       <Navbar />
 
       {/* মোবাইল ডিভাইসের জন্য ফ্লোটিং টগল বাটন */}
@@ -122,21 +120,34 @@ console.log("Menu:", menuItems);
 
       <div className="d-flex flex-grow-1 position-relative">
         
+        {/* সাইডবার ব্যাকড্রপ / ওভারলে (শুধুমাত্র মোবাইলে সাইডবার খোলা থাকলে মেইন কন্টেন্ট ঝাপসা বা লক করার জন্য) */}
+        {sidebarOpen && (
+          <div 
+            className="d-md-none position-fixed top-0 start-0 w-100 h-100" 
+            style={{ backgroundColor: "rgba(0,0,0,0.4)", zIndex: 1030 }}
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
         {/* সাইডবার (aside) */}
+        {/* মোবাইলে এটিকে position-fixed এবং ডেস্কটপে position-relative এ রূপান্তর করা হয়েছে */}
         <aside 
           className={`bg-white text-dark d-flex flex-column shadow ${
             sidebarOpen ? "d-flex" : "d-none d-md-flex"
-          }`}
+          } ${sidebarOpen ? "position-fixed position-md-relative" : "position-relative"}`}
           style={{
             width: sidebarOpen ? "280px" : "80px",
-            transition: "width 0.3s ease",
+            transition: "width 0.3s ease, left 0.3s ease",
             minHeight: "calc(100vh - 56px)",
-            zIndex: 1040
+            height: "100%",
+            zIndex: 1040,
+            left: 0,
+            top: window.innerWidth < 768 ? "57px" : "auto" // মোবাইলে টপবারের নিচে থাকবে
           }}
         >
           {/* সাইডবার হেডার (ডেস্কটপ মোডে টগল বাটন) */}
           <div className="p-3 d-none d-md-flex justify-content-between align-items-center border-bottom border-light">
-            {sidebarOpen && <span className="fw-bold text-primary  tracking-wider">Dashboard</span>}
+            {sidebarOpen && <span className="fw-bold text-primary tracking-wider">Dashboard</span>}
             <button 
               onClick={() => setSidebarOpen(!sidebarOpen)} 
               className="btn btn-link text-dark p-1 ms-auto text-decoration-none"
@@ -183,7 +194,6 @@ console.log("Menu:", menuItems);
                   {firstName.charAt(0).toUpperCase()}
                 </div>
                 <div className="overflow-hidden">
-                  {/* ফিক্সড ডাইনামিক নেম */}
                   <p className="m-0 text-sm fw-bold text-dark text-truncate">{firstName}</p>
                   <p className="m-0 text-xs text-muted text-capitalize">{role}</p>
                 </div>
@@ -193,8 +203,9 @@ console.log("Menu:", menuItems);
         </aside>
 
         {/* মেইন কন্টেন্ট এরিয়া */}
-        <main className="flex-grow-1 p-3 p-md-5 bg-light overflow-auto">
-          <div className="container-fluid">
+        {/* w-100 এবং overflow-hidden যুক্ত করা হয়েছে যাতে স্ক্রিনের বাইরে কনটেন্ট না যায় */}
+        <main className="flex-grow-1 p-2 p-sm-3 p-md-5 bg-light overflow-hidden w-100">
+          <div className="container-fluid px-0 px-md-2">
             
             {/* পেজ টাইটেল হেডার */}
             <div className="d-none d-md-block mb-4">
@@ -204,7 +215,8 @@ console.log("Menu:", menuItems);
             </div>
             
             {/* চাইল্ড কম্পোনেন্ট রেন্ডারিং এরিয়া */}
-            <div className="bg-white rounded shadow-sm p-4" style={{ minHeight: "calc(100vh - 240px)" }}>
+            {/* মোবাইলে অতিরিক্ত প্যাডিং কমানো হয়েছে (p-2 p-md-4) */}
+            <div className="bg-white rounded shadow-sm p-2 p-md-4" style={{ minHeight: "calc(100vh - 240px)" }}>
               <Outlet />
             </div>
           </div>
@@ -222,6 +234,8 @@ console.log("Menu:", menuItems);
       `}</style>
     </div>
   );
+
+
 };
 
 export default DashboardLayout;
