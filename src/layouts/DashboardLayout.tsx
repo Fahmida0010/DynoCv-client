@@ -40,12 +40,10 @@ const DashboardLayout: React.FC = () => {
     enabled: !!user?.email && !loading,
     queryFn: async () => {
       const res = await axiosSecure.get(`/auth/users/${user?.email}`);
-      console.log("API Response:", res.data);
-      return res.data;
+        return res.data;
     },
   });
 
-  console.log("dbUser =", dbUser);
 
   const role = dbUser?.role;
   
@@ -97,9 +95,6 @@ const DashboardLayout: React.FC = () => {
   if (role === "CANDIDATE") menuItems = candidateMenu;
   else if (role === "RECRUITER") menuItems = recruiterMenu;
   else if (role === "ADMIN") menuItems = adminMenu;
-
- console.log("Role:", role);
-console.log("Menu:", menuItems);
 
 return (
     <div className="d-flex flex-column min-vh-100 bg-light">
