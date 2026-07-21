@@ -3,7 +3,7 @@ import { FaSave, FaArrowLeft, FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
-// Prisma AttributeLibrary স্কিমা অনুযায়ী টাইপ
+
 interface Attribute {
   id: string;
   label: string;
@@ -47,8 +47,8 @@ export const CreatePosition: React.FC = () => {
       prev.includes(attrId) ? prev.filter((id) => id !== attrId) : [...prev, attrId]
     );
   };
+ 
 
-  // ফর্ম সাবমিট হ্যান্ডলার (Save Position & Templates)
   const handleSavePosition = async () => {
     // ভ্যালিডেশন চেক
     if (!title.trim() || !description.trim()) {
@@ -62,7 +62,6 @@ export const CreatePosition: React.FC = () => {
     }
 
     // ব্যাকএন্ডে পাঠানোর জন্য ডাইনামিক পেলোড
-    // এটি আপনার backend-এ Position এবং সাথে রিলেটেড TemplateField একসাথে ক্রিয়েট করবে
     const payload = {
       title: title.trim(),
       description: description.trim(),
@@ -71,15 +70,19 @@ export const CreatePosition: React.FC = () => {
 
     try {
       setLoading(true);
+        const token = localStorage.getItem("token");
       const response = await fetch("http://localhost:5000/api/positions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify(payload),
       });
 
       if (response.ok) {
+        const resData = await response.json();
+        
         // সফল হলে SweetAlert2 সাকসেস মেসেজ
         Swal.fire({
           icon: "success",
@@ -89,9 +92,15 @@ export const CreatePosition: React.FC = () => {
           showConfirmButton: false,
         });
         
-        // ড্যাশবোর্ডে রিডাইরেক্ট
+        // ব্যাকএন্ড যদি নতুন পজিশনের সাথে অটো-ক্রিয়েটেড discussion পাঠায়, তবে সেখানে রিডাইরেক্ট করবে
+        const newDiscussionId = resData?.discussions?.[0]?.id;
+        
         setTimeout(() => {
-          navigate("/dashboard/positions");
+          if (newDiscussionId) {
+            navigate(`/dashboard/discussions?id=${newDiscussionId}`);
+          } else {
+            navigate("/dashboard/positions");
+          }
         }, 2000);
       } else {
         const errorData = await response.json().catch(() => ({}));

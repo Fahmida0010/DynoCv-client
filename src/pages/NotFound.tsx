@@ -13,9 +13,7 @@ const NotFound = () => {
 
           <p className="text-muted mb-4">
             Oops! The page you are looking for doesn't exist or has been moved.
-            If you just logged in via Google/Facebook, please check your route
-            setup.
-          </p>
+                     </p>
 
           <button
             className="btn btn-primary btn-lg shadow-sm px-4"

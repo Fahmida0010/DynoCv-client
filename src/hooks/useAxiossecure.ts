@@ -16,7 +16,7 @@ export const useAxiosSecure = () => {
 
   axiosSecure.interceptors.request.use(
     (config) => {
-      const token = localStorage.getItem("dynocv_token");
+      const token = localStorage.getItem("token");
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }

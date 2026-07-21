@@ -24,6 +24,7 @@ import { CandidateCVs } from "../pages/Dashboard/recruiter/CandidateCVs";
 import { Statistics } from "../pages/Dashboard/admin/Statistics";
 import { ManageUsers } from "../pages/Dashboard/admin/ManageUsers";
 import { AllCVs } from "../pages/Dashboard/admin/AllCVs";
+import NotFound from "../pages/NotFound";
 
 
 
@@ -131,5 +132,10 @@ export const router = createBrowserRouter([
                 ]
             }
         ]
-    }
+    },
+
+  {
+            path: "*",
+            element: <NotFound />
+        }
 ]);

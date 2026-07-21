@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FaBriefcase, FaEdit, FaCopy, FaTrash, FaPlus } from "react-icons/fa";
+import { FaBriefcase, FaEdit, FaCopy, FaTrash, FaPlus, FaComments } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import useAxiosSecure from "../../../hooks/useAxiossecure";
 import Swal from "sweetalert2";
@@ -14,12 +14,15 @@ interface PositionItem {
       label: string;
     };
   }[];
+  discussions?: {
+    id: string;
+  }[];
   _count: {
     cvs: number;
   };
 }
 
-const API_BASE_URL = `${import.meta.env.VITE_API_URL}/api/positions`;
+const API_BASE_URL = `${import.meta.env.VITE_API_URL}/api/positions`;  
 
 export const Positions: React.FC = () => {
   const navigate = useNavigate();
@@ -64,7 +67,7 @@ export const Positions: React.FC = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axiosSecure.post(`${API_BASE_URL}/${id}/duplicate`);
+          await axiosSecure.post(`${API_BASE_URL}/${id}/duplicate`, {});
           Swal.fire("Duplicated!", "Position has been duplicated successfully.", "success");
           fetchPositions();
         } catch (error) {
@@ -173,6 +176,20 @@ export const Positions: React.FC = () => {
 
                     <div className="d-flex justify-content-end gap-2 border-top pt-2">
                       <button 
+                     onClick={() => {
+  const discId = pos.discussions?.[0]?.id;
+  if (discId) {
+    navigate(`/dashboard/discussions?id=${discId}`);
+  } else {
+    Swal.fire("Notice", "No discussion thread available for this position.", "info");
+  }
+}}
+                        className="btn btn-sm btn-light border" 
+                        title="Discussion Thread"
+                      >
+                        <FaComments className="text-info" />
+                      </button>
+                      <button 
                         onClick={() => handleDuplicate(pos.id)} 
                         className="btn btn-sm btn-light border" 
                         title="Duplicate"
@@ -235,6 +252,20 @@ export const Positions: React.FC = () => {
                       </td>
                       <td className="text-end">
                         <div className="d-flex justify-content-end gap-2">
+                          <button 
+                           onClick={() => {
+  const discId = pos.discussions?.[0]?.id;
+  if (discId) {
+      navigate(`/dashboard/discussions?id=${discId}`);
+  } else {
+    Swal.fire("Notice", "No discussion thread available for this position.", "info");
+  }
+}}
+                            className="btn btn-sm btn-outline-info" 
+                            title="Discussion Thread"
+                          >
+                            <FaComments />
+                          </button>
                           <button onClick={() => handleDuplicate(pos.id)} className="btn btn-sm btn-outline-secondary" title="Duplicate Position"><FaCopy /></button>
                           <button onClick={() => openEditModal(pos)} className="btn btn-sm btn-outline-primary" title="Edit"><FaEdit /></button>
                           <button onClick={() => handleDelete(pos.id)} className="btn btn-sm btn-outline-danger" title="Delete"><FaTrash /></button>

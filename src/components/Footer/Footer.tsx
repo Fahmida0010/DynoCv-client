@@ -15,13 +15,13 @@ const Footer = () => {
             
             {/* Social Media Icons */}
             <div className="d-flex justify-content-center justify-content-md-start gap-3 mt-4">
-              <a href="https://github.com" target="_blank" rel="noreferrer" className="text-light fs-4 transition-icon">
+              <a href="https://github.com/Fahmida0010" target="_blank" rel="noreferrer" className="text-light fs-4 transition-icon">
                 <i className="bi bi-github"></i>
               </a>
-              <a href="https://facebook.com" target="_blank" rel="noreferrer" className="text-light fs-4 transition-icon">
+              <a href="https://www.facebook.com/nihsanga.cetana" target="_blank" rel="noreferrer" className="text-light fs-4 transition-icon">
                 <i className="bi bi-facebook"></i>
               </a>
-              <a href="https://youtube.com" target="_blank" rel="noreferrer" className="text-light fs-4 transition-icon">
+              <a href="https://www.youtube.com/@ciencefiction" target="_blank" rel="noreferrer" className="text-light fs-4 transition-icon">
                 <i className="bi bi-youtube"></i>
               </a>
             </div>

@@ -81,7 +81,7 @@ const Navbar = () => {
                 </li>
                 <li><hr className="dropdown-divider" /></li>
                   <li><Link to="/dashboard" className="dropdown-item">Dashboard</Link></li>
-                <li><Link to="/dashboard/profile" className="dropdown-item">My Profile</Link></li>
+          
                 <li>
                   <button className="dropdown-item text-danger" onClick={handleLogout}>Logout</button>
                 </li>
