@@ -26,7 +26,8 @@ export const CreatePosition: React.FC = () => {
     const fetchAttributes = async () => {
       try {
         // আপনার ব্যাকএন্ড API এন্ডপয়েন্ট অনুযায়ী ইউআরএল পরিবর্তন করে নিবেন
-        const response = await fetch("http://localhost:5000/api/attributes");
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/attributes`);
+      
         if (response.ok) {
           const data = await response.json();
           setAvailableAttributes(data);
@@ -65,13 +66,13 @@ export const CreatePosition: React.FC = () => {
     const payload = {
       title: title.trim(),
       description: description.trim(),
-      attributeIds: selectedAttributes, // Database থেকে আসা ID-সমূহের অ্যারে [ "uuid-1", "uuid-2" ]
+      attributeIds: selectedAttributes, 
     };
 
     try {
       setLoading(true);
         const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/positions", {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/positions`,   {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -92,7 +93,7 @@ export const CreatePosition: React.FC = () => {
           showConfirmButton: false,
         });
         
-        // ব্যাকএন্ড যদি নতুন পজিশনের সাথে অটো-ক্রিয়েটেড discussion পাঠায়, তবে সেখানে রিডাইরেক্ট করবে
+      
         const newDiscussionId = resData?.discussions?.[0]?.id;
         
         setTimeout(() => {

@@ -5,11 +5,11 @@ import Swal from "sweetalert2";
 interface Attribute {
   id: string;
   label: string;
-  type: string; // TEXT, NUMBER, BOOLEAN
+  type: string; 
   isBuiltIn: boolean;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE_URL = import.meta.env.VITE_API_URL ;
 
 export const AttributeLibrary: React.FC = () => {
   const [attributes, setAttributes] = useState<Attribute[]>([]);
@@ -22,7 +22,7 @@ export const AttributeLibrary: React.FC = () => {
   const [label, setLabel] = useState<string>("");
   const [type, setType] = useState<string>("TEXT");
 
-  // ১. DB থেকে সব ডাটা রিড করা
+
   const fetchAttributes = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/api/attributes`);
@@ -47,7 +47,7 @@ export const AttributeLibrary: React.FC = () => {
     fetchAttributes();
   }, []);
 
-  // Modal ওপেন করার ফাংশন (Add Mode)
+
   const openAddModal = () => {
     setIsEditMode(false);
     setSelectedId(null);
@@ -56,7 +56,7 @@ export const AttributeLibrary: React.FC = () => {
     setShowModal(true);
   };
 
-  // Modal ওপেন করার ফাংশন (Edit Mode)
+  
   const openEditModal = (attr: Attribute) => {
     setIsEditMode(true);
     setSelectedId(attr.id);
@@ -68,7 +68,7 @@ export const AttributeLibrary: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   
-  // সেফটি চেক: স্টেট খালি কিনা
+
   if (!label || !label.trim()) {
     Swal.fire({
       icon: "error",
@@ -85,12 +85,12 @@ export const AttributeLibrary: React.FC = () => {
       
     const method = isEditMode ? "PUT" : "POST";
 
-    // 💡 এখানে স্পষ্টভাবে অবজেক্ট তৈরি করা হচ্ছে যা ব্যাকএন্ডের DTO এক্সপেক্ট করে
+  
     const requestBody = isEditMode
       ? { label: label.trim() }
       : { label: label.trim(), type: type, isBuiltIn: false };
 
-    console.log("Sending payload:", requestBody); // আপনার ব্রাউজার কনসোলে ডাটা চেক করার জন্য
+    console.log("Sending payload:", requestBody); 
 
     const res = await fetch(url, {
       method: method,
@@ -98,12 +98,12 @@ export const AttributeLibrary: React.FC = () => {
         "Content-Type": "application/json",
         "Accept": "application/json"
       },
-      body: JSON.stringify(requestBody), // অবজেক্টকে JSON স্ট্রিং-এ রূপান্তর
+      body: JSON.stringify(requestBody), 
     });
 
     if (res.ok) {
       setShowModal(false);
-      fetchAttributes(); // টেবিল ডাটা রিফ্রেশ করবে
+      fetchAttributes(); 
       
       Swal.fire({
         icon: "success",
@@ -131,7 +131,7 @@ export const AttributeLibrary: React.FC = () => {
 };
 
 
-  // ৩. DB থেকে ডিলিট করা (SweetAlert2 কনফার্মেশন সহ)
+
   const handleDeleteAttribute = async (id: string) => {
     Swal.fire({
       title: "Are you sure?",

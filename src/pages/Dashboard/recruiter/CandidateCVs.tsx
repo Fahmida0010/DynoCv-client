@@ -27,7 +27,8 @@ export const CandidateCVs: React.FC = () => {
   const fetchCVs = async () => {
     setLoading(true);
     try {
-      const response = await axiosSecure.get("http://localhost:5000/api/candidate-cvs", {
+      const response = await axiosSecure.get(`${import.meta.env.VITE_API_URL}/api/candidate-cvs`,
+               {
         params: {
           search: search,
           positionId: selectedPosition,
@@ -44,8 +45,8 @@ export const CandidateCVs: React.FC = () => {
   // মেthod: ড্রপডাউনের জন্য পজিশন লিস্ট লোড করা
   const fetchPositions = async () => {
     try {
-      const response = await axiosSecure.get("http://localhost:5000/api/candidate-cvs/positions");
-      setPositions(response.data);
+      const response = await axiosSecure.get(`${import.meta.env.VITE_API_URL}/api/candidate-cvs/positions`);
+        setPositions(response.data);
     } catch (error) {
       console.error("Error fetching positions:", error);
     }
