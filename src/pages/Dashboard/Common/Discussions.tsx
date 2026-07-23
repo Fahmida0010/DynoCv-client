@@ -66,9 +66,9 @@ export const Discussions: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   const API_BASE_URL = `${import.meta.env.VITE_API_URL}/api/comments`;
-  const DISCUSSION_API_URL = `${import.meta.env.VITE_API_URL}/api/discussions`; // ব্যাকএন্ডের ডিসকাশন এন্ডপয়েন্ট
+  const DISCUSSION_API_URL = `${import.meta.env.VITE_API_URL}/api/discussions`; 
 
-  // ১. ব্যাকএন্ড থেকে ডিসকাশন ডিটেইলস (পজিশন + অ্যাট্রিবিউটস) এবং কমেন্ট লোড করা
+
   useEffect(() => {
     if (!discussionId) {
       setLoading(false);
