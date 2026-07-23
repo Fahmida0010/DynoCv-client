@@ -32,13 +32,13 @@ const Navbar = () => {
 
         {/* Navbar Content */}
         <div className="collapse navbar-collapse" id="mainNavbar">
-          {/* me-lg-auto ব্যবহারের ফলে বড় স্ক্রিনে এর ডানের এলিমেন্টগুলো একদম ডান কোনায় পুশ হবে */}
+  
           <ul className="navbar-nav ms-lg-5 me-lg-auto text-center mb-3 mb-lg-0 fw-medium">
             <li className="nav-item">
               <NavLink className="nav-link" to="/">Home</NavLink>
             </li>
             <li className="nav-item">
-              <NavLink className="nav-link" to="/positions">Positions</NavLink>
+              <NavLink className="nav-link" to="/allpositions"> All Positions</NavLink>
             </li>
             <li className="nav-item">
               <NavLink className="nav-link" to="/about">About</NavLink>
@@ -47,13 +47,12 @@ const Navbar = () => {
 
           {/* User Conditional Buttons */}
           {!user ? (
-            /* ms-lg-auto বড় স্ক্রিনে এটিকে ডানে রাখবে এবং ছোট স্ক্রিনে সেন্টারে নিয়ে আসবে */
+        
             <div className="d-flex flex-column flex-lg-row gap-2 mb-3 mb-lg-0 justify-content-center ms-lg-auto">
               <Link to="/login" className="btn btn-outline-primary px-4">Login</Link>
               <Link to="/register" className="btn btn-primary px-4">Register</Link>
             </div>
           ) : (
-            /* এখানেও ms-lg-auto ব্যবহারের মাধ্যমে ড্রপডাউনটিকে বড় স্ক্রিনে একদম ডানে রেসপনসিভ এলাইন করা হয়েছে */
             <div className="dropdown d-flex justify-content-center justify-content-lg-end mb-3 mb-lg-0 ms-lg-auto">
               <button
                 type="button"
