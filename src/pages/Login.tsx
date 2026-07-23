@@ -7,6 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 import { loginSchema, type LoginInput } from "../schemas/auth.schema";
 import { AuthContext } from "../context/AuthContext";
 import useAxiosSecure from "../hooks/useAxiossecure";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 
 export const Login = () => {
@@ -15,6 +16,8 @@ export const Login = () => {
   const auth = useContext(AuthContext);
   const navigate = useNavigate();
   const axiosSecure = useAxiosSecure();
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+
 
   const {
     register,
@@ -94,27 +97,34 @@ export const Login = () => {
               </div>
             )}
           </div>
+<div className="mb-4">
+  <label className="form-label small fw-semibold">
+    Password
+  </label>
 
-          <div className="mb-4">
-            <label className="form-label small fw-semibold">
-              Password
-            </label>
+  <div className="input-group">
+    <input
+      type={showPassword ? "text" : "password"}
+      {...register("password")}
+      className={`form-control ${errors.password ? "is-invalid" : ""}`}
+      placeholder="••••••••"
+    />
+    <button
+      type="button"
+      className="btn btn-outline-secondary d-flex align-items-center"
+      onClick={() => setShowPassword(!showPassword)}
+      style={{ zIndex: 4 }}
+    >
+      {showPassword ? <FaEyeSlash /> : <FaEye />}
+    </button>
+  </div>
 
-            <input
-              type="password"
-              {...register("password")}
-              className={`form-control ${
-                errors.password ? "is-invalid" : ""
-              }`}
-              placeholder="••••••••"
-            />
-
-            {errors.password && (
-              <div className="invalid-feedback small">
-                {errors.password.message}
-              </div>
-            )}
-          </div>
+  {errors.password && (
+    <div className="invalid-feedback small d-block">
+      {errors.password.message}
+    </div>
+  )}
+</div>
 
           <button
             type="submit"

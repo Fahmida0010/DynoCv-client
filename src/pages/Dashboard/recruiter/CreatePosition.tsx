@@ -14,18 +14,18 @@ interface Attribute {
 export const CreatePosition: React.FC = () => {
   const navigate = useNavigate();
 
-  // স্টেট ম্যানেজমেন্ট
+  
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedAttributes, setSelectedAttributes] = useState<string[]>([]);
   const [availableAttributes, setAvailableAttributes] = useState<Attribute[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Database-এর AttributeLibrary থেকে ডাইনামিকালি ডাটা ফেচ করা
+  
   useEffect(() => {
     const fetchAttributes = async () => {
       try {
-        // আপনার ব্যাকএন্ড API এন্ডপয়েন্ট অনুযায়ী ইউআরএল পরিবর্তন করে নিবেন
+    
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/attributes`);
       
         if (response.ok) {
