@@ -1,5 +1,5 @@
 import React from "react";
-import { FaCog, FaUserShield, FaSave } from "react-icons/fa";
+import {FaUserShield, FaSave } from "react-icons/fa";
 
 export const Settings: React.FC = () => {
   const handleRemoveAdminRole = () => {
