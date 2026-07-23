@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { FaBriefcase, FaEdit, FaCopy, FaTrash, FaPlus, FaComments } from "react-icons/fa";
+import { FaBriefcase, FaEdit, FaCopy, FaTrash, FaPlus, FaComments, FaPaperPlane } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import useAxiosSecure from "../../../hooks/useAxiossecure";
+import { useAuth } from "../../context/AuthContext"; // আপনার দেওয়া ইম্পোর্টটি অ্যাক্টিভ করা হলো
 import Swal from "sweetalert2";
+import useAxiosSecure from "../../hooks/useAxiossecure";
 
-interface PositionItem {
+interface AllpositionItem {
   id: string;
   title: string;
   description?: string;
@@ -24,14 +25,19 @@ interface PositionItem {
 
 const API_BASE_URL = `${import.meta.env.VITE_API_URL}/api/positions`;  
 
-export const Positions: React.FC = () => {
+export const Allpositions: React.FC = () => {
   const navigate = useNavigate();
   const axiosSecure = useAxiosSecure();
-  const [positionsList, setPositionsList] = useState<PositionItem[]>([]);
+  
+  // ─── রিয়াল AUTH HOOK কল করা হলো ──────────────────────────────────────
+  const { user } = useAuth(); 
+  const isLoggedIn = !!user; // ইউজার অবজেক্ট থাকলে true, না থাকলে false
+
+  const [positionsList, setPositionsList] = useState<AllpositionItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   // Edit Modal State
-  const [selectedPosition, setSelectedPosition] = useState<PositionItem | null>(null);
+  const [selectedPosition, setSelectedPosition] = useState<AllpositionItem | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editStatus, setEditStatus] = useState(true);
@@ -40,7 +46,7 @@ export const Positions: React.FC = () => {
   const fetchPositions = async () => {
     try {
       setLoading(true);
-      const response = await axiosSecure.get<PositionItem[]>(API_BASE_URL);
+      const response = await axiosSecure.get<AllpositionItem[]>(API_BASE_URL);
       setPositionsList(response.data);
     } catch (error) {
       console.error("Error fetching positions:", error);
@@ -53,6 +59,21 @@ export const Positions: React.FC = () => {
   useEffect(() => {
     fetchPositions();
   }, []);
+
+  // অ্যাপ্লাই করার ফাংশন (লগইন ইউজারদের জন্য)
+  const handleApply = (id: string) => {
+    Swal.fire({
+      title: "Apply for this position?",
+      text: "Do you want to submit your CV for this role?",
+      icon: "info",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Apply",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        navigate(`/apply/${id}`);
+      }
+    });
+  };
 
   // ডুপ্লিকেট করার ফাংশন
   const handleDuplicate = async (id: string) => {
@@ -101,7 +122,7 @@ export const Positions: React.FC = () => {
   };
 
   // এডিট বাটন ক্লিক হ্যান্ডলার
-  const openEditModal = (pos: PositionItem) => {
+  const openEditModal = (pos: AllpositionItem) => {
     setSelectedPosition(pos);
     setEditTitle(pos.title);
     setEditDescription(pos.description || "");
@@ -137,12 +158,20 @@ export const Positions: React.FC = () => {
       {/* হেডার সেকশন */}
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
         <div>
-          <h2 className="mb-1 fs-3 fw-bold">Manage Positions</h2>
-          <p className="text-muted small mb-0">All recruiters share access to modify and manage these positions.</p>
+          <h2 className="mb-1 fs-3 fw-bold">
+            {isLoggedIn ? "Manage & Apply Positions" : "Available Positions (Read-Only)"}
+          </h2>
+          <p className="text-muted small mb-0">
+            {isLoggedIn 
+              ? "You can view, manage or apply to the open positions with your CV." 
+              : "Please login to apply. Currently viewing in read-only mode."}
+          </p>
         </div>
-        <button onClick={() => navigate("/dashboard/create-position")} className="btn btn-primary d-flex align-items-center justify-content-center gap-2 w-100 w-md-auto">
-          <FaPlus /> Create Position
-        </button> 
+        {isLoggedIn && (
+          <button onClick={() => navigate("/dashboard/create-position")} className="btn btn-primary d-flex align-items-center justify-content-center gap-2 w-100 w-md-auto">
+            <FaPlus /> Create Position
+          </button> 
+        )}
       </div>
 
       {positionsList.length === 0 ? (
@@ -169,47 +198,36 @@ export const Positions: React.FC = () => {
                       <div className="mb-1">
                         <strong>Template:</strong> {pos.templates?.[0]?.attribute?.label || "No Template"}
                       </div>
-                      <div>
-                        <strong>CVs Received:</strong> <span className="badge bg-info text-dark ms-1">{pos._count?.cvs || 0} Applicants</span>
-                      </div>
+                      {isLoggedIn && (
+                        <div>
+                          <strong>CVs Received:</strong> <span className="badge bg-info text-dark ms-1">{pos._count?.cvs || 0} Applicants</span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="d-flex justify-content-end gap-2 border-top pt-2">
-                      <button 
-                     onClick={() => {
-  const discId = pos.discussions?.[0]?.id;
-  if (discId) {
-    navigate(`/dashboard/discussions?id=${discId}`);
-  } else {
-    Swal.fire("Notice", "No discussion thread available for this position.", "info");
-  }
-}}
-                        className="btn btn-sm btn-light border" 
-                        title="Discussion Thread"
-                      >
-                        <FaComments className="text-info" />
-                      </button>
-                      <button 
-                        onClick={() => handleDuplicate(pos.id)} 
-                        className="btn btn-sm btn-light border" 
-                        title="Duplicate"
-                      >
-                        <FaCopy className="text-secondary" />
-                      </button>
-                      <button 
-                        onClick={() => openEditModal(pos)} 
-                        className="btn btn-sm btn-light border" 
-                        title="Edit"
-                      >
-                        <FaEdit className="text-primary" />
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(pos.id)} 
-                        className="btn btn-sm btn-light border" 
-                        title="Delete"
-                      >
-                        <FaTrash className="text-danger" />
-                      </button>
+                      {isLoggedIn ? (
+                        <>
+                          <button onClick={() => handleApply(pos.id)} className="btn btn-sm btn-success d-flex align-items-center gap-1" title="Apply with CV">
+                            <FaPaperPlane size={12}/> Apply Now
+                          </button>
+                          <button 
+                            onClick={() => {
+                              const discId = pos.discussions?.[0]?.id;
+                              if (discId) navigate(`/dashboard/discussions?id=${discId}`);
+                              else Swal.fire("Notice", "No discussion thread available.", "info");
+                            }}
+                            className="btn btn-sm btn-light border" title="Discussion"
+                          >
+                            <FaComments className="text-info" />
+                          </button>
+                          <button onClick={() => handleDuplicate(pos.id)} className="btn btn-sm btn-light border" title="Duplicate"><FaCopy className="text-secondary" /></button>
+                          <button onClick={() => openEditModal(pos)} className="btn btn-sm btn-light border" title="Edit"><FaEdit className="text-primary" /></button>
+                          <button onClick={() => handleDelete(pos.id)} className="btn btn-sm btn-light border" title="Delete"><FaTrash className="text-danger" /></button>
+                        </>
+                      ) : (
+                        <span className="text-muted small italic">Read-only mode</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -225,7 +243,7 @@ export const Positions: React.FC = () => {
                   <tr>
                     <th>Position Title</th>
                     <th>Associated Template</th>
-                    <th>CVs Received</th>
+                    {isLoggedIn && <th>CVs Received</th>}
                     <th>Status</th>
                     <th className="text-end">Actions</th>
                   </tr>
@@ -240,11 +258,13 @@ export const Positions: React.FC = () => {
                         </div>
                       </td>
                       <td>{pos.templates?.[0]?.attribute?.label || "No Template"}</td>
-                      <td>
-                        <span className="badge bg-info text-dark">
-                          {pos._count?.cvs || 0} Applicants
-                        </span>
-                      </td>
+                      {isLoggedIn && (
+                        <td>
+                          <span className="badge bg-info text-dark">
+                            {pos._count?.cvs || 0} Applicants
+                          </span>
+                        </td>
+                      )}
                       <td>
                         <span className={`badge ${pos.isActive ? "bg-success" : "bg-warning text-dark"}`}>
                           {pos.isActive ? "Active" : "Draft"}
@@ -252,23 +272,28 @@ export const Positions: React.FC = () => {
                       </td>
                       <td className="text-end">
                         <div className="d-flex justify-content-end gap-2">
-                          <button 
-                           onClick={() => {
-  const discId = pos.discussions?.[0]?.id;
-  if (discId) {
-      navigate(`/dashboard/discussions?id=${discId}`);
-  } else {
-    Swal.fire("Notice", "No discussion thread available for this position.", "info");
-  }
-}}
-                            className="btn btn-sm btn-outline-info" 
-                            title="Discussion Thread"
-                          >
-                            <FaComments />
-                          </button>
-                          <button onClick={() => handleDuplicate(pos.id)} className="btn btn-sm btn-outline-secondary" title="Duplicate Position"><FaCopy /></button>
-                          <button onClick={() => openEditModal(pos)} className="btn btn-sm btn-outline-primary" title="Edit"><FaEdit /></button>
-                          <button onClick={() => handleDelete(pos.id)} className="btn btn-sm btn-outline-danger" title="Delete"><FaTrash /></button>
+                          {isLoggedIn ? (
+                            <>
+                              <button onClick={() => handleApply(pos.id)} className="btn btn-sm btn-success d-flex align-items-center gap-1">
+                                <FaPaperPlane size={12}/> Apply
+                              </button>
+                              <button 
+                                onClick={() => {
+                                  const discId = pos.discussions?.[0]?.id;
+                                  if (discId) navigate(`/dashboard/discussions?id=${discId}`);
+                                  else Swal.fire("Notice", "No discussion thread available.", "info");
+                                }}
+                                className="btn btn-sm btn-outline-info" title="Discussion Thread"
+                              >
+                                <FaComments />
+                              </button>
+                              <button onClick={() => handleDuplicate(pos.id)} className="btn btn-sm btn-outline-secondary" title="Duplicate Position"><FaCopy /></button>
+                              <button onClick={() => openEditModal(pos)} className="btn btn-sm btn-outline-primary" title="Edit"><FaEdit /></button>
+                              <button onClick={() => handleDelete(pos.id)} className="btn btn-sm btn-outline-danger" title="Delete"><FaTrash /></button>
+                            </>
+                          ) : (
+                            <button className="btn btn-sm btn-outline-secondary disabled" disabled>Read-Only</button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -281,7 +306,7 @@ export const Positions: React.FC = () => {
       )}
 
       {/* ================= EDIT MODAL OVERLAY ================= */}
-      {selectedPosition && (
+      {isLoggedIn && selectedPosition && (
         <div className="modal show d-block px-2" style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1050 }} tabIndex={-1}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content shadow-lg border-0">
@@ -293,31 +318,15 @@ export const Positions: React.FC = () => {
                 <div className="modal-body p-3 p-md-4">
                   <div className="mb-3">
                     <label className="form-label fw-semibold small">Position Title</label>
-                    <input 
-                      type="text" 
-                      className="form-control" 
-                      value={editTitle} 
-                      onChange={(e) => setEditTitle(e.target.value)} 
-                      required 
-                    />
+                    <input type="text" className="form-control" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} required />
                   </div>
                   <div className="mb-3">
                     <label className="form-label fw-semibold small">Description</label>
-                    <textarea 
-                      className="form-control" 
-                      rows={4} 
-                      value={editDescription} 
-                      onChange={(e) => setEditDescription(e.target.value)}
-                      required
-                    />
+                    <textarea className="form-control" rows={4} value={editDescription} onChange={(e) => setEditDescription(e.target.value)} required />
                   </div>
                   <div className="mb-2">
                     <label className="form-label fw-semibold small">Status</label>
-                    <select 
-                      className="form-select" 
-                      value={editStatus ? "true" : "false"} 
-                      onChange={(e) => setEditStatus(e.target.value === "true")}
-                    >
+                    <select className="form-select" value={editStatus ? "true" : "false"} onChange={(e) => setEditStatus(e.target.value === "true")}>
                       <option value="true">Active</option>
                       <option value="false">Draft</option>
                     </select>

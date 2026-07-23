@@ -26,6 +26,7 @@ import { ManageUsers } from "../pages/Dashboard/admin/ManageUsers";
 import { AllCVs } from "../pages/Dashboard/admin/AllCVs";
 import NotFound from "../pages/NotFound";
 import { About } from "../components/About/About";
+import { Allpositions } from "../components/Allposition/Allposition";
 
 
 
@@ -39,6 +40,10 @@ export const router = createBrowserRouter([
                 index: true,
                 element: <Home />
             },
+                {
+        path: "allposition",
+        element: <Allpositions />,
+      },
             {
         path: "about",
         element: <About />,
