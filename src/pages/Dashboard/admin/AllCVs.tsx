@@ -14,7 +14,7 @@ interface SystemCV {
   };
 }
 
-const API_BASE_URL = `${import.meta.env.VITE_API_URL}/admin/cvs`;
+const API_BASE_URL = `${import.meta.env.VITE_API_URL}/api/admin/cvs`;
  
 
 export const AllCVs: React.FC = () => {

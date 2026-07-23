@@ -121,7 +121,7 @@ const Hero = () => {
                 </Link>
 
                 <Link
-                  to="/positions"
+                  to="/available-positions"
                   className="btn btn-outline-primary hero-btn"
                 >
                   Browse Positions

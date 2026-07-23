@@ -1,6 +1,5 @@
-import CTA from "../components/home/CTA";
 import FAQ from "../components/home/FAQ";
-import FeaturedJobs from "../components/home/FeaturedJobs";
+import { FeaturedJobs } from "../components/home/FeaturedJobs";
 import Hero from "../components/home/Hero";
 import HowItWorks from "../components/home/HowItWorks";
 import LatestCV from "../components/home/LatestCV";
@@ -11,8 +10,6 @@ const Home = () => {
     <>
       <Hero />
 
-      {/* Statistics */}
-
       <LatestCV/>
 
        <FeaturedJobs />
@@ -20,13 +17,7 @@ const Home = () => {
        <HowItWorks/>
        <Roles/>
        <FAQ/>
-       <CTA/>
-
-      {/* User Roles */}
-
-      {/* Testimonials */}
-
-      {/* FAQ */}
+       
 
   
     </>

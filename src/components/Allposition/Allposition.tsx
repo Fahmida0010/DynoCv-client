@@ -1,346 +1,231 @@
 import React, { useEffect, useState } from "react";
-import { FaBriefcase, FaEdit, FaCopy, FaTrash, FaPlus, FaComments, FaPaperPlane } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext"; // আপনার দেওয়া ইম্পোর্টটি অ্যাক্টিভ করা হলো
+import { FaBriefcase, FaEye, FaFileMedical, FaSearch } from "react-icons/fa";
 import Swal from "sweetalert2";
 import useAxiosSecure from "../../hooks/useAxiossecure";
 
-interface AllpositionItem {
+interface Position {
   id: string;
   title: string;
-  description?: string;
+  description: string;
   isActive: boolean;
-  templates: {
+  templates: Array<{
     attribute: {
+      id: string;
       label: string;
+      type: string;
     };
-  }[];
-  discussions?: {
-    id: string;
-  }[];
-  _count: {
-    cvs: number;
-  };
+  }>;
 }
 
-const API_BASE_URL = `${import.meta.env.VITE_API_URL}/api/positions`;  
-
-export const Allpositions: React.FC = () => {
-  const navigate = useNavigate();
-  const axiosSecure = useAxiosSecure();
-  
-  // ─── রিয়াল AUTH HOOK কল করা হলো ──────────────────────────────────────
-  const { user } = useAuth(); 
-  const isLoggedIn = !!user; // ইউজার অবজেক্ট থাকলে true, না থাকলে false
-
-  const [positionsList, setPositionsList] = useState<AllpositionItem[]>([]);
+export const AvailablePositions: React.FC = () => {
+  const [positions, setPositions] = useState<Position[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
+  const axiosSecure = useAxiosSecure();
 
-  // Edit Modal State
-  const [selectedPosition, setSelectedPosition] = useState<AllpositionItem | null>(null);
-  const [editTitle, setEditTitle] = useState("");
-  const [editDescription, setEditDescription] = useState("");
-  const [editStatus, setEditStatus] = useState(true);
-
-  // ডাটা ফেচ করার ফাংশন
-  const fetchPositions = async () => {
-    try {
-      setLoading(true);
-      const response = await axiosSecure.get<AllpositionItem[]>(API_BASE_URL);
-      setPositionsList(response.data);
-    } catch (error) {
-      console.error("Error fetching positions:", error);
-      Swal.fire("Error!", "Failed to fetch data.", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // ১. ডাটাবেজ থেকে অ্যাক্টিভ পজিশনগুলো লোড করা
   useEffect(() => {
-    fetchPositions();
-  }, []);
+    axiosSecure
+      .get("positions") // আপনার ব্যাকএন্ডের পজিশন এন্ডপয়েন্ট
+      .then((res) => {
+        // শুধুমাত্র অ্যাক্টিভ পজিশন ফিল্টার করে রাখা (স্কিমা অনুযায়ী isActive)
+        const activePositions = res.data.filter((pos: Position) => pos.isActive);
+        setPositions(activePositions);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching positions:", err);
+        setLoading(false);
+      });
+  }, [axiosSecure]);
 
-  // অ্যাপ্লাই করার ফাংশন (লগইন ইউজারদের জন্য)
-  const handleApply = (id: string) => {
-    Swal.fire({
-      title: "Apply for this position?",
-      text: "Do you want to submit your CV for this role?",
-      icon: "info",
-      showCancelButton: true,
-      confirmButtonText: "Yes, Apply",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        navigate(`/apply/${id}`);
-      }
-    });
-  };
-
-  // ডুপ্লিকেট করার ফাংশন
-  const handleDuplicate = async (id: string) => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "Do you want to duplicate this position?",
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, duplicate it!",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          await axiosSecure.post(`${API_BASE_URL}/${id}/duplicate`, {});
-          Swal.fire("Duplicated!", "Position has been duplicated successfully.", "success");
-          fetchPositions();
-        } catch (error) {
-          Swal.fire("Error!", "Failed to duplicate position.", "error");
-        }
-      }
-    });
-  };
-
-  // ডিলিট করার ফাংশন
-  const handleDelete = async (id: string) => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          await axiosSecure.delete(`${API_BASE_URL}/${id}`);
-          setPositionsList(positionsList.filter((item) => item.id !== id));
-          Swal.fire("Deleted!", "Position has been deleted.", "success");
-        } catch (error) {
-          Swal.fire("Error!", "Failed to delete position.", "error");
-        }
-      }
-    });
-  };
-
-  // এডিট বাটন ক্লিক হ্যান্ডলার
-  const openEditModal = (pos: AllpositionItem) => {
-    setSelectedPosition(pos);
-    setEditTitle(pos.title);
-    setEditDescription(pos.description || "");
-    setEditStatus(pos.isActive);
-  };
-
-  // আপডেট সাবমিট করার ফাংশন
-  const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedPosition) return;
-
+  // ২. অটোমেটিক সিভি জেনারেশন এবং সাবমিশন প্রসেস
+  const handleApplyPosition = async (position: Position) => {
     try {
-      await axiosSecure.put(`${API_BASE_URL}/${selectedPosition.id}`, {
-        title: editTitle,
-        description: editDescription,
-        isActive: editStatus,
+      Swal.fire({
+        title: "Compiling Profile Data...",
+        text: "Please wait while we gather your profile attributes.",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
       });
 
-      Swal.fire("Updated!", "Position data has been updated.", "success");
-      setSelectedPosition(null);
-      fetchPositions();
-    } catch (error) {
-      Swal.fire("Error!", "Failed to update position.", "error");
+      // ক্যান্ডিডেটের প্রোফাইল, কাস্টম অ্যাট্রিবিউট এবং প্রজেক্ট ডেটা একসাথে ফেচ করা
+      const [profileRes, attributesRes, projectsRes] = await Promise.all([
+        axiosSecure.get("profile/me"),
+        axiosSecure.get("profile/attributes"),
+        axiosSecure.get("profile/projects"),
+      ]);
+
+      const profileData = profileRes.data;
+      const userAttributes = attributesRes.data;
+      const projectsData = projectsRes.data;
+
+      // 🧠 Killer Feature Logic: পজিশন টেমপ্লেটের সাথে ইউজারের ডেটা ফিল্টার করা
+      const requiredAttributeIds = position.templates.map((t) => t.attribute.id);
+      
+      const filteredAttributes = userAttributes.filter((attr: any) =>
+        requiredAttributeIds.includes(attr.attributeId)
+      );
+
+      // ফাইনাল JSON Snapshot অবজেক্ট তৈরি (Prisma-র Json content ফিল্ডের জন্য)
+      const cvSnapshot = {
+        me: {
+          firstName: profileData.firstName,
+          lastName: profileData.lastName,
+          location: profileData.location || "Not Provided",
+          photoUrl: profileData.photoUrl || "",
+        },
+        info: filteredAttributes.map((attr: any) => ({
+          label: attr.attribute.label,
+          value: attr.value,
+          type: attr.attribute.type,
+        })),
+        projects: projectsData.map((proj: any) => ({
+          name: proj.name,
+          description: proj.description,
+          tags: proj.tags,
+        })),
+      };
+
+      // 🎨 Swal এর মাধ্যমে ডাইনামিক সিভি প্রিভিউ জেনারেট করা
+      Swal.fire({
+        title: `Tailored CV Preview`,
+        html: `
+          <div style="text-align: left; max-height: 400px; overflow-y: auto; padding: 10px; border: 1px solid #eee;">
+            <h5 style="color:#0d6efd;">${cvSnapshot.me.firstName} ${cvSnapshot.me.lastName}</h5>
+            <p className="text-muted">📍 ${cvSnapshot.me.location}</p>
+            <hr/>
+            <h6><strong>Position Specific Attributes:</strong></h6>
+            ${
+              cvSnapshot.info.length > 0
+                ? cvSnapshot.info.map((i: any) => `<p><strong>${i.label}:</strong> ${i.value}</p>`).join("")
+                : "<p className='text-muted small'>No custom attributes required for this role.</p>"
+            }
+            <hr/>
+            <h6><strong>Included Projects:</strong></h6>
+            ${cvSnapshot.projects.map((p: any) => `<div><strong>${p.name}</strong><br/><small>${p.tags.join(", ")}</small></div>`).join("<br/>")}
+          </div>
+        `,
+        icon: "info",
+        showCancelButton: true,
+        confirmButtonColor: "#0d6efd",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Confirm & Submit Application",
+        cancelButtonText: "Cancel",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            // ব্যাকএন্ডে CV স্কিমা অনুযায়ী ডাটা পোস্ট করা
+            await axiosSecure.post("dashboard/my-cvs", {
+              positionId: position.id,
+              content: cvSnapshot, // JSON snapshot object
+            });
+
+            Swal.fire({
+              icon: "success",
+              title: "Application Submitted!",
+              text: `Your dynamic CV for ${position.title} has been generated and saved successfully.`,
+              timer: 3000,
+              showConfirmButton: false,
+            });
+          } catch (postErr: any) {
+            console.error(postErr);
+            Swal.fire({
+              icon: "error",
+              title: "Submission Failed",
+              text: postErr.response?.data?.message || "You might have already applied for this position.",
+            });
+          }
+        }
+      });
+    } catch (fetchErr) {
+      console.error(fetchErr);
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: "Failed to assemble your profile data. Please ensure your profile setup is complete.",
+      });
     }
   };
 
+  // সার্চ ফিল্টার লজিক
+  const filteredPositions = positions.filter((pos) =>
+    pos.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    pos.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (loading) {
-    return <div className="text-center my-5"><h5>Loading Positions...</h5></div>;
+    return (
+      <div className="text-center p-5">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="position-relative container-fluid px-2 px-md-3">
-      {/* হেডার সেকশন */}
-      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
-        <div>
-          <h2 className="mb-1 fs-3 fw-bold">
-            {isLoggedIn ? "Manage & Apply Positions" : "Available Positions (Read-Only)"}
-          </h2>
-          <p className="text-muted small mb-0">
-            {isLoggedIn 
-              ? "You can view, manage or apply to the open positions with your CV." 
-              : "Please login to apply. Currently viewing in read-only mode."}
-          </p>
-        </div>
-        {isLoggedIn && (
-          <button onClick={() => navigate("/dashboard/create-position")} className="btn btn-primary d-flex align-items-center justify-content-center gap-2 w-100 w-md-auto">
-            <FaPlus /> Create Position
-          </button> 
-        )}
+    <div>
+      <div className="mb-4">
+        <h2>Available Positions</h2>
+        <p className="text-muted">Browse active recruitment positions and create tailored profiles.</p>
       </div>
 
-      {positionsList.length === 0 ? (
-        <div className="text-center text-muted py-5 border rounded bg-white">No positions found.</div>
-      ) : (
-        <>
-          {/* ================= 1. MOBILE DEVICE CARD VIEW ================= */}
-          <div className="d-block d-md-none">
-            <div className="row g-3">
-              {positionsList.map((pos) => (
-                <div key={pos.id} className="col-12">
-                  <div className="card shadow-sm border border-light-subtle rounded-3 p-3 bg-white">
-                    <div className="d-flex justify-content-between align-items-start mb-2">
-                      <div className="d-flex align-items-center gap-2">
-                        <FaBriefcase className="text-primary flex-shrink-0" />
-                        <h6 className="fw-bold mb-0 text-dark text-wrap">{pos.title}</h6>
-                      </div>
-                      <span className={`badge px-2 py-1 ${pos.isActive ? "bg-success" : "bg-warning text-dark"}`}>
-                        {pos.isActive ? "Active" : "Draft"}
-                      </span>
-                    </div>
+      {/* Search Filter Bar */}
+      <div className="input-group mb-4" style={{ maxWidth: "400px" }}>
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Search positions..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <button className="btn btn-outline-secondary" type="button">
+          <FaSearch />
+        </button>
+      </div>
 
-                    <div className="mb-3 small text-muted">
-                      <div className="mb-1">
-                        <strong>Template:</strong> {pos.templates?.[0]?.attribute?.label || "No Template"}
-                      </div>
-                      {isLoggedIn && (
-                        <div>
-                          <strong>CVs Received:</strong> <span className="badge bg-info text-dark ms-1">{pos._count?.cvs || 0} Applicants</span>
-                        </div>
-                      )}
-                    </div>
+      {/* Positions Grid */}
+      <div className="row">
+        {filteredPositions.length > 0 ? (
+          filteredPositions.map((pos) => (
+            <div className="col-md-6 mb-4" key={pos.id}>
+              <div className="card h-100 border-start border-primary border-4 shadow-sm">
+                <div className="card-body d-flex flex-column justify-content-between">
+                  <div>
+                    <h5 className="card-title fw-bold text-dark d-flex align-items-center gap-2">
+                      <FaBriefcase className="text-muted" /> {pos.title}
+                    </h5>
+                    <p className="card-text text-muted small mt-2">{pos.description}</p>
 
-                    <div className="d-flex justify-content-end gap-2 border-top pt-2">
-                      {isLoggedIn ? (
-                        <>
-                          <button onClick={() => handleApply(pos.id)} className="btn btn-sm btn-success d-flex align-items-center gap-1" title="Apply with CV">
-                            <FaPaperPlane size={12}/> Apply Now
-                          </button>
-                          <button 
-                            onClick={() => {
-                              const discId = pos.discussions?.[0]?.id;
-                              if (discId) navigate(`/dashboard/discussions?id=${discId}`);
-                              else Swal.fire("Notice", "No discussion thread available.", "info");
-                            }}
-                            className="btn btn-sm btn-light border" title="Discussion"
-                          >
-                            <FaComments className="text-info" />
-                          </button>
-                          <button onClick={() => handleDuplicate(pos.id)} className="btn btn-sm btn-light border" title="Duplicate"><FaCopy className="text-secondary" /></button>
-                          <button onClick={() => openEditModal(pos)} className="btn btn-sm btn-light border" title="Edit"><FaEdit className="text-primary" /></button>
-                          <button onClick={() => handleDelete(pos.id)} className="btn btn-sm btn-light border" title="Delete"><FaTrash className="text-danger" /></button>
-                        </>
-                      ) : (
-                        <span className="text-muted small italic">Read-only mode</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* ================= 2. DESKTOP/LAPTOP TABLE VIEW ================= */}
-          <div className="d-none d-md-block card shadow-sm border-0 rounded-3">
-            <div className="table-responsive">
-              <table className="table table-hover align-middle mb-0">
-                <thead className="table-light">
-                  <tr>
-                    <th>Position Title</th>
-                    <th>Associated Template</th>
-                    {isLoggedIn && <th>CVs Received</th>}
-                    <th>Status</th>
-                    <th className="text-end">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {positionsList.map((pos) => (
-                    <tr key={pos.id}>
-                      <td>
-                        <div className="d-flex align-items-center gap-2">
-                          <FaBriefcase className="text-primary flex-shrink-0" />
-                          <span className="fw-semibold">{pos.title}</span>
-                        </div>
-                      </td>
-                      <td>{pos.templates?.[0]?.attribute?.label || "No Template"}</td>
-                      {isLoggedIn && (
-                        <td>
-                          <span className="badge bg-info text-dark">
-                            {pos._count?.cvs || 0} Applicants
-                          </span>
-                        </td>
-                      )}
-                      <td>
-                        <span className={`badge ${pos.isActive ? "bg-success" : "bg-warning text-dark"}`}>
-                          {pos.isActive ? "Active" : "Draft"}
+                    <div className="mb-3">
+                      {pos.templates.map((t, idx) => (
+                        <span key={idx} className="badge bg-light text-dark border me-1">
+                          {t.attribute.label}
                         </span>
-                      </td>
-                      <td className="text-end">
-                        <div className="d-flex justify-content-end gap-2">
-                          {isLoggedIn ? (
-                            <>
-                              <button onClick={() => handleApply(pos.id)} className="btn btn-sm btn-success d-flex align-items-center gap-1">
-                                <FaPaperPlane size={12}/> Apply
-                              </button>
-                              <button 
-                                onClick={() => {
-                                  const discId = pos.discussions?.[0]?.id;
-                                  if (discId) navigate(`/dashboard/discussions?id=${discId}`);
-                                  else Swal.fire("Notice", "No discussion thread available.", "info");
-                                }}
-                                className="btn btn-sm btn-outline-info" title="Discussion Thread"
-                              >
-                                <FaComments />
-                              </button>
-                              <button onClick={() => handleDuplicate(pos.id)} className="btn btn-sm btn-outline-secondary" title="Duplicate Position"><FaCopy /></button>
-                              <button onClick={() => openEditModal(pos)} className="btn btn-sm btn-outline-primary" title="Edit"><FaEdit /></button>
-                              <button onClick={() => handleDelete(pos.id)} className="btn btn-sm btn-outline-danger" title="Delete"><FaTrash /></button>
-                            </>
-                          ) : (
-                            <button className="btn btn-sm btn-outline-secondary disabled" disabled>Read-Only</button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </>
-      )}
+                      ))}
+                    </div>
+                  </div>
 
-      {/* ================= EDIT MODAL OVERLAY ================= */}
-      {isLoggedIn && selectedPosition && (
-        <div className="modal show d-block px-2" style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1050 }} tabIndex={-1}>
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content shadow-lg border-0">
-              <div className="modal-header bg-primary text-white">
-                <h5 className="modal-title fs-5">Edit Position</h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setSelectedPosition(null)}></button>
+                  <div className="d-flex justify-content-end gap-2 mt-3 pt-3 border-top">
+                    <button className="btn btn-sm btn-light border d-flex align-items-center gap-1">
+                      <FaEye /> Details
+                    </button>
+                    <button
+                      className="btn btn-sm btn-primary d-flex align-items-center gap-1"
+                      onClick={() => handleApplyPosition(pos)}
+                    >
+                      <FaFileMedical /> Apply / Create CV
+                    </button>
+                  </div>
+                </div>
               </div>
-              <form onSubmit={handleUpdate}>
-                <div className="modal-body p-3 p-md-4">
-                  <div className="mb-3">
-                    <label className="form-label fw-semibold small">Position Title</label>
-                    <input type="text" className="form-control" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} required />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label fw-semibold small">Description</label>
-                    <textarea className="form-control" rows={4} value={editDescription} onChange={(e) => setEditDescription(e.target.value)} required />
-                  </div>
-                  <div className="mb-2">
-                    <label className="form-label fw-semibold small">Status</label>
-                    <select className="form-select" value={editStatus ? "true" : "false"} onChange={(e) => setEditStatus(e.target.value === "true")}>
-                      <option value="true">Active</option>
-                      <option value="false">Draft</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="modal-footer bg-light">
-                  <button type="button" className="btn btn-sm btn-secondary px-3" onClick={() => setSelectedPosition(null)}>Cancel</button>
-                  <button type="submit" className="btn btn-sm btn-primary px-3">Update Position</button>
-                </div>
-              </form>
             </div>
-          </div>
-        </div>
-      )}
+          ))
+        ) : (
+          <div className="text-center p-5 text-muted">No active positions match your criteria.</div>
+        )}
+      </div>
     </div>
   );
 };

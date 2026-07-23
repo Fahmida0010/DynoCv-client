@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { FaChartPie, FaFileAlt, FaUsers, FaBriefcase, FaClock, FaSpinner } from "react-icons/fa";
+import {FaFileAlt, FaUsers, FaBriefcase, FaClock, FaSpinner } from "react-icons/fa";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from "chart.js";
 import { Bar, Doughnut } from "react-chartjs-2";
 
-// Chart.js কম্পোনেন্ট রেজিস্টার করা
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
 interface StatsData {
@@ -11,10 +10,10 @@ interface StatsData {
   activePositions: number;
   totalCvs: number;
   recentCvs: number;
-  recentActivity: Array<{ id: number; message: string; time: string }>;
+
 }
 
-const API_URL =`${import.meta.env.VITE_API_URL}/admin/stats`;
+const API_URL =`${import.meta.env.VITE_API_URL}/api/admin/stats`;
  
 
 export const Statistics: React.FC = () => {
@@ -52,7 +51,6 @@ export const Statistics: React.FC = () => {
     return <div className="alert alert-danger">{error || "Data unavailable"}</div>;
   }
 
-  // গ্রাফ ১: বার চার্ট কনফিগারেশন
   const barChartData = {
     labels: ["Total Candidates", "Active Positions", "Total CVs Generated"],
     datasets: [
@@ -66,7 +64,6 @@ export const Statistics: React.FC = () => {
     ],
   };
 
-  // গ্রাফ ২: ডোনাট চার্ট কনফিগারেশন
   const doughnutChartData = {
     labels: ["Candidates", "Positions", "CVs"],
     datasets: [
@@ -162,22 +159,7 @@ export const Statistics: React.FC = () => {
         </div>
       </div>
 
-      {/* System Activity Log */}
-      <div className="card shadow-sm border-light-subtle">
-        <div className="card-header bg-white fw-bold d-flex align-items-center gap-2 py-3">
-          <FaChartPie className="text-primary" /> Recent Platform Insights
-        </div>
-        <div className="card-body p-0">
-          <ul className="list-group list-group-flush mb-0">
-            {stats.recentActivity.map((activity) => (
-              <li key={activity.id} className="list-group-item d-flex justify-content-between align-items-center small py-3 px-4">
-                <span className="text-dark fw-medium">{activity.message}</span>
-                <span className="badge bg-light text-muted border px-2 py-1">{activity.time}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
+     
     </div>
   );
 };

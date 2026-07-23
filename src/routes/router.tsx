@@ -15,7 +15,7 @@ import { ProjectsPage } from "../pages/Dashboard/candidate/ProjectsPage";
 import Profile from "../pages/Dashboard/Common/profile-temp";
 import { Discussions } from "../pages/Dashboard/Common/Discussions";
 import { MyCVs } from "../pages/Dashboard/candidate/MyCVs";
-import { AvailablePositions } from "../pages/Dashboard/candidate/AvailablePositions";
+// import { AvailablePositions } from "../pages/Dashboard/candidate/AvailablePositions";
 import { Settings } from "../pages/Dashboard/Common/settings";
 import { Positions } from "../pages/Dashboard/recruiter/Positions";
 import { CreatePosition } from "../pages/Dashboard/recruiter/CreatePosition";
@@ -26,7 +26,8 @@ import { ManageUsers } from "../pages/Dashboard/admin/ManageUsers";
 import { AllCVs } from "../pages/Dashboard/admin/AllCVs";
 import NotFound from "../pages/NotFound";
 import { About } from "../components/About/About";
-import { Allpositions } from "../components/Allposition/Allposition";
+import { AvailablePositions } from "../components/AvailablePositions/AvailablePositions";
+// import { Allpositions } from "../components/Allposition/Allposition";
 
 
 
@@ -41,8 +42,8 @@ export const router = createBrowserRouter([
                 element: <Home />
             },
                 {
-        path: "allposition",
-        element: <Allpositions />,
+        path: "available-positions",
+        element: <AvailablePositions />,
       },
             {
         path: "about",

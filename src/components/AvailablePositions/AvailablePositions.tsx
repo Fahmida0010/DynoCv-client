@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FaBriefcase, FaEye, FaFileMedical } from "react-icons/fa";
+import { FaBriefcase, FaEye, FaFileMedical, FaSearch } from "react-icons/fa";
 import Swal from "sweetalert2";
 import useAxiosSecure from "../../hooks/useAxiossecure";
 
@@ -17,18 +17,19 @@ interface Position {
   }>;
 }
 
-export const FeaturedJobs: React.FC = () => {
+export const AvailablePositions: React.FC = () => {
   const [positions, setPositions] = useState<Position[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const axiosSecure = useAxiosSecure();
 
+  
   useEffect(() => {
     axiosSecure
-      .get("positions")
+      .get("positions") 
       .then((res) => {
         const activePositions = res.data.filter((pos: Position) => pos.isActive);
-        
-        setPositions(activePositions.slice(0, 4));
+        setPositions(activePositions);
         setLoading(false);
       })
       .catch((err) => {
@@ -86,13 +87,13 @@ export const FeaturedJobs: React.FC = () => {
         html: `
           <div style="text-align: left; max-height: 400px; overflow-y: auto; padding: 10px; border: 1px solid #eee;">
             <h5 style="color:#0d6efd;">${cvSnapshot.me.firstName} ${cvSnapshot.me.lastName}</h5>
-            <p class="text-muted">📍 ${cvSnapshot.me.location}</p>
+            <p className="text-muted">📍 ${cvSnapshot.me.location}</p>
             <hr/>
             <h6><strong>Position Specific Attributes:</strong></h6>
             ${
               cvSnapshot.info.length > 0
                 ? cvSnapshot.info.map((i: any) => `<p><strong>${i.label}:</strong> ${i.value}</p>`).join("")
-                : "<p class='text-muted small'>No custom attributes required for this role.</p>"
+                : "<p className='text-muted small'>No custom attributes required for this role.</p>"
             }
             <hr/>
             <h6><strong>Included Projects:</strong></h6>
@@ -140,44 +141,58 @@ export const FeaturedJobs: React.FC = () => {
     }
   };
 
+  const filteredPositions = positions.filter((pos) =>
+    pos.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    pos.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (loading) {
     return (
-      <div className="text-center p-5 my-5">
+      <div className="text-center p-5">
         <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading Featured Jobs...</span>
+          <span className="visually-hidden">Loading...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container py-5">
-      {/* সেকশন হেডার */}
-      <div className="text-center mb-5">
-        <h2 className="fw-bold">Featured Job Positions</h2>
-        <p className="text-muted">Explore some of our most popular open roles and apply instantly.</p>
+    <div>
+      <div className="mb-4 p-4">
+        <h2>Available Positions</h2>
+        <p className="text-muted">Browse active recruitment positions and create tailored profiles.</p>
       </div>
 
-      {/* পজিশন গ্রিড */}
-      <div className="row">
-        {positions.length > 0 ? (
-          positions.map((pos) => (
+      {/* Search Filter Bar */}
+      <div className="input-group mb-4 p-3" style={{ maxWidth: "400px" }}>
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Search positions..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <button className="btn btn-outline-secondary" type="button">
+          <FaSearch />
+        </button>
+      </div>
+
+      {/* Positions Grid */}
+      <div className="row p-4">
+        {filteredPositions.length > 0 ? (
+          filteredPositions.map((pos) => (
             <div className="col-md-6 mb-4" key={pos.id}>
-              <div className="card h-100 border-start border-primary border-4 shadow-sm bg-white">
+              <div className="card h-100 border-start border-primary border-4 shadow-sm">
                 <div className="card-body d-flex flex-column justify-content-between">
                   <div>
                     <h5 className="card-title fw-bold text-dark d-flex align-items-center gap-2">
-                      <FaBriefcase className="text-primary" /> {pos.title}
+                      <FaBriefcase className="text-muted" /> {pos.title}
                     </h5>
-                    <p className="card-text text-muted small mt-2">
-                      {pos.description.length > 150 
-                        ? `${pos.description.substring(0, 150)}...` 
-                        : pos.description}
-                    </p>
+                    <p className="card-text text-muted small mt-2">{pos.description}</p>
 
                     <div className="mb-3">
                       {pos.templates.map((t, idx) => (
-                        <span key={idx} className="badge bg-light text-dark border me-1 small">
+                        <span key={idx} className="badge bg-light text-dark border me-1">
                           {t.attribute.label}
                         </span>
                       ))}
@@ -192,7 +207,7 @@ export const FeaturedJobs: React.FC = () => {
                       className="btn btn-sm btn-primary d-flex align-items-center gap-1"
                       onClick={() => handleApplyPosition(pos)}
                     >
-                      <FaFileMedical /> Apply Now
+                      <FaFileMedical /> Apply / Create CV
                     </button>
                   </div>
                 </div>
@@ -200,7 +215,7 @@ export const FeaturedJobs: React.FC = () => {
             </div>
           ))
         ) : (
-          <div className="text-center p-5 text-muted col-12">No featured jobs available right now.</div>
+          <div className="text-center p-5 text-muted">No active positions match your criteria.</div>
         )}
       </div>
     </div>

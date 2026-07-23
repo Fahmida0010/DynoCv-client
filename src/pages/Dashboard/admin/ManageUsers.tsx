@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FaBan, FaTrash, FaCheckCircle, FaSpinner } from "react-icons/fa";
+import Swal from "sweetalert2";
 
 interface UserItem {
   id: string;
@@ -10,9 +11,7 @@ interface UserItem {
   isBlocked: boolean;
 }
 
-const API_BASE_URL = `${import.meta.env.VITE_API_URL}/admin/users`;
-
-
+const API_BASE_URL = `${import.meta.env.VITE_API_URL}/api/admin/users`;
 
 export const ManageUsers: React.FC = () => {
   const [users, setUsers] = useState<UserItem[]>([]);
@@ -51,17 +50,39 @@ export const ManageUsers: React.FC = () => {
       setUsers((prev) =>
         prev.map((user) => (user.id === id ? { ...user, role: newRole } : user))
       );
+
+      Swal.fire({
+        icon: "success",
+        title: "Updated!",
+        text: `User role has been updated to ${newRole}.`,
+        timer: 2000,
+        showConfirmButton: false,
+      });
     } catch (err: any) {
-      alert(err.message);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: err.message,
+      });
     }
   };
 
   // Block / Unblock User
   const handleToggleBlock = async (id: string, currentStatus: boolean) => {
     const nextStatus = !currentStatus;
-    const confirmMsg = `Are you sure you want to ${nextStatus ? "BLOCK" : "UNBLOCK"} this user?`;
-    
-    if (!window.confirm(confirmMsg)) return;
+    const actionText = nextStatus ? "BLOCK" : "UNBLOCK";
+
+    const result = await Swal.fire({
+      title: `Are you sure?`,
+      text: `You are about to ${actionText} this user!`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: nextStatus ? "#dc3545" : "#198754",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: `Yes, ${actionText}!`,
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       const response = await fetch(`${API_BASE_URL}/${id}/block`, {
@@ -74,14 +95,36 @@ export const ManageUsers: React.FC = () => {
       setUsers((prev) =>
         prev.map((user) => (user.id === id ? { ...user, isBlocked: nextStatus } : user))
       );
+
+      Swal.fire({
+        icon: "success",
+        title: "Success!",
+        text: `User has been successfully ${nextStatus ? "blocked" : "unblocked"}.`,
+        timer: 2000,
+        showConfirmButton: false,
+      });
     } catch (err: any) {
-      alert(err.message);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: err.message,
+      });
     }
   };
 
   // Delete User
   const handleDeleteUser = async (id: string) => {
-    if (!window.confirm("Are you sure you want to permanently DELETE this user?")) return;
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this! The user will be permanently DELETED.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc3545",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       const response = await fetch(`${API_BASE_URL}/${id}`, {
@@ -90,8 +133,20 @@ export const ManageUsers: React.FC = () => {
       if (!response.ok) throw new Error("Failed to delete user");
 
       setUsers((prev) => prev.filter((user) => user.id !== id));
+
+      Swal.fire({
+        icon: "success",
+        title: "Deleted!",
+        text: "User has been deleted.",
+        timer: 2000,
+        showConfirmButton: false,
+      });
     } catch (err: any) {
-      alert(err.message);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: err.message,
+      });
     }
   };
 
