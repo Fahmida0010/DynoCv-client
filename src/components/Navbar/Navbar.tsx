@@ -13,11 +13,10 @@ const Navbar = () => {
 
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top py-2">
-      {/* 🟢 container er bodle container-fluid babohar kora hoyeche */}
-      {/* 🟢 px-lg-5 jog kora hoyeche jate ekdom gayer sathe lege na thake, dekhte premium lage */}
+     
       <div className="container-fluid px-4 px-lg-5">
         
-        {/* Logo */}
+      
         <Logo />
 
         {/* Mobile Toggler Button */}

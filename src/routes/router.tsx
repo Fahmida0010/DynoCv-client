@@ -25,6 +25,7 @@ import { Statistics } from "../pages/Dashboard/admin/Statistics";
 import { ManageUsers } from "../pages/Dashboard/admin/ManageUsers";
 import { AllCVs } from "../pages/Dashboard/admin/AllCVs";
 import NotFound from "../pages/NotFound";
+import { About } from "../components/About/About";
 
 
 
@@ -38,6 +39,10 @@ export const router = createBrowserRouter([
                 index: true,
                 element: <Home />
             },
+            {
+        path: "about",
+        element: <About />,
+      },
             {
                 path: "login",
                 element: <Login />
