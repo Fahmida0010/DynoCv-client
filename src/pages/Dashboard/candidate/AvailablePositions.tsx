@@ -23,12 +23,10 @@ export const AvailablePositions: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const axiosSecure = useAxiosSecure();
 
-  // ১. ডাটাবেজ থেকে অ্যাক্টিভ পজিশনগুলো লোড করা
   useEffect(() => {
     axiosSecure
-      .get("positions") // আপনার ব্যাকএন্ডের পজিশন এন্ডপয়েন্ট
+      .get("positions")
       .then((res) => {
-        // শুধুমাত্র অ্যাক্টিভ পজিশন ফিল্টার করে রাখা (স্কিমা অনুযায়ী isActive)
         const activePositions = res.data.filter((pos: Position) => pos.isActive);
         setPositions(activePositions);
         setLoading(false);
