@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FaBriefcase, FaEye, FaFileMedical, FaSearch } from "react-icons/fa";
+import { FaBriefcase, FaEye, FaFileMedical, FaSearch, FaThumbsUp } from "react-icons/fa";
 import Swal from "sweetalert2";
 import useAxiosSecure from "../../hooks/useAxiossecure";
 
@@ -8,6 +8,8 @@ interface Position {
   title: string;
   description: string;
   isActive: boolean;
+  likesCount?: number; 
+  isLikedByUser?: boolean;
   templates: Array<{
     attribute: {
       id: string;
@@ -23,10 +25,9 @@ export const AvailablePositions: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const axiosSecure = useAxiosSecure();
 
-  
   useEffect(() => {
     axiosSecure
-      .get("positions") 
+      .get("positions")
       .then((res) => {
         const activePositions = res.data.filter((pos: Position) => pos.isActive);
         setPositions(activePositions);
@@ -37,6 +38,36 @@ export const AvailablePositions: React.FC = () => {
         setLoading(false);
       });
   }, [axiosSecure]);
+
+  // লাইক টগল করার হ্যান্ডলার মেথড
+  const handleToggleLike = async (positionId: string) => {
+    try {
+      const response = await axiosSecure.post(`positions/${positionId}/like`);
+      const { liked } = response.data;
+
+      // লোকাল স্টেট আপডেট যাতে রিয়েল-টাইমে UI-তে লাইক কাউন্ট বাড়ে/কমে
+      setPositions((prevPositions) =>
+        prevPositions.map((pos) => {
+          if (pos.id === positionId) {
+            const currentLikes = pos.likesCount || 0;
+            return {
+              ...pos,
+              isLikedByUser: liked,
+              likesCount: liked ? currentLikes + 1 : Math.max(0, currentLikes - 1),
+            };
+          }
+          return pos;
+        })
+      );
+    } catch (error) {
+      console.error("Error toggling like:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Something went wrong while processing your request.",
+      });
+    }
+  };
 
   const handleApplyPosition = async (position: Position) => {
     try {
@@ -87,13 +118,13 @@ export const AvailablePositions: React.FC = () => {
         html: `
           <div style="text-align: left; max-height: 400px; overflow-y: auto; padding: 10px; border: 1px solid #eee;">
             <h5 style="color:#0d6efd;">${cvSnapshot.me.firstName} ${cvSnapshot.me.lastName}</h5>
-            <p className="text-muted">📍 ${cvSnapshot.me.location}</p>
+            <p class="text-muted">📍 ${cvSnapshot.me.location}</p>
             <hr/>
             <h6><strong>Position Specific Attributes:</strong></h6>
             ${
               cvSnapshot.info.length > 0
                 ? cvSnapshot.info.map((i: any) => `<p><strong>${i.label}:</strong> ${i.value}</p>`).join("")
-                : "<p className='text-muted small'>No custom attributes required for this role.</p>"
+                : "<p class='text-muted small'>No custom attributes required for this role.</p>"
             }
             <hr/>
             <h6><strong>Included Projects:</strong></h6>
@@ -157,14 +188,14 @@ export const AvailablePositions: React.FC = () => {
   }
 
   return (
-    <div>
-      <div className="mb-4 p-4">
-        <h2>Available Positions</h2>
+    <div className="container-fluid px-3 py-4">
+      <div className="mb-4">
+        <h2 className="fw-bold text-dark">Available Positions</h2>
         <p className="text-muted">Browse active recruitment positions and create tailored profiles.</p>
       </div>
 
       {/* Search Filter Bar */}
-      <div className="input-group mb-4 p-3" style={{ maxWidth: "400px" }}>
+      <div className="input-group mb-4" style={{ maxWidth: "400px" }}>
         <input
           type="text"
           className="form-control"
@@ -178,21 +209,38 @@ export const AvailablePositions: React.FC = () => {
       </div>
 
       {/* Positions Grid */}
-      <div className="row p-4">
+      <div className="row">
         {filteredPositions.length > 0 ? (
           filteredPositions.map((pos) => (
-            <div className="col-md-6 mb-4" key={pos.id}>
+            <div className="col-12 col-md-6 col-lg-4 mb-4" key={pos.id}>
               <div className="card h-100 border-start border-primary border-4 shadow-sm">
                 <div className="card-body d-flex flex-column justify-content-between">
                   <div>
-                    <h5 className="card-title fw-bold text-dark d-flex align-items-center gap-2">
-                      <FaBriefcase className="text-muted" /> {pos.title}
-                    </h5>
-                    <p className="card-text text-muted small mt-2">{pos.description}</p>
+                    <div className="d-flex justify-content-between align-items-start gap-2">
+                      <h5 className="card-title fw-bold text-dark d-flex align-items-center gap-2 mb-0">
+                        <FaBriefcase className="text-muted flex-shrink-0" /> {pos.title}
+                      </h5>
+                      
+                      {/* লাইক বাটন ইন্টারফেস */}
+                      <button
+                        onClick={() => handleToggleLike(pos.id)}
+                        className={`btn btn-sm d-inline-flex align-items-center gap-1.5 border rounded-pill px-2.5 py-1 transition-all ${
+                          pos.isLikedByUser 
+                            ? "btn-primary border-primary text-white" 
+                            : "btn-light border-secondary-subtle text-secondary"
+                        }`}
+                        title={pos.isLikedByUser ? "Unlike this position" : "Like this position"}
+                      >
+                        <FaThumbsUp />
+                        <span className="fw-semibold small">{pos.likesCount || 0}</span>
+                      </button>
+                    </div>
 
-                    <div className="mb-3">
+                    <p className="card-text text-muted small mt-3 mb-3">{pos.description}</p>
+
+                    <div className="mb-3 d-flex flex-wrap gap-1">
                       {pos.templates.map((t, idx) => (
-                        <span key={idx} className="badge bg-light text-dark border me-1">
+                        <span key={idx} className="badge bg-light text-dark border">
                           {t.attribute.label}
                         </span>
                       ))}
@@ -215,7 +263,7 @@ export const AvailablePositions: React.FC = () => {
             </div>
           ))
         ) : (
-          <div className="text-center p-5 text-muted">No active positions match your criteria.</div>
+          <div className="col-12 text-center p-5 text-muted">No active positions match your criteria.</div>
         )}
       </div>
     </div>
