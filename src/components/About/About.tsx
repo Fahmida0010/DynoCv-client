@@ -4,11 +4,12 @@ import {
   FaCogs, 
   FaLayerGroup, 
   FaUserTie, 
-  FaUserShield, 
   FaUserGraduate, 
-  FaCode, 
-  FaDatabase, 
-  FaShieldAlt 
+  FaUsers, 
+  FaBriefcase, 
+  FaClock,
+  FaShieldAlt, 
+  FaLock 
 } from "react-icons/fa";
 
 export const About: React.FC = () => {
@@ -19,12 +20,12 @@ export const About: React.FC = () => {
       description: "Define professional attributes once (e.g., IELTS, Tech Stack, Remote Availability) and reuse them seamlessly across multiple positions and dynamic CVs."
     },
     {
-      icon: <FaCogs className="text-success fs-3" />,
+      icon: <FaCogs className="text-primary fs-3" />,
       title: "Customizable Templates",
       description: "Recruiters can architect position-specific dynamic CV templates on the fly by picking required criteria directly from the global attribute pool."
     },
     {
-      icon: <FaRocket className="text-warning fs-3" />,
+      icon: <FaRocket className="text-primary fs-3" />,
       title: "Automated CV Snapshot Assembly",
       description: "No manual compilation needed! The platform automatically extracts candidate profile metrics and matches them with recruiter specifications into an unmodifiable JSON snapshot."
     }
@@ -32,7 +33,7 @@ export const About: React.FC = () => {
 
   const coreRoles = [
     {
-      icon: <FaUserGraduate className="text-info fs-4" />,
+      icon: <FaUserGraduate className="text-primary fs-4" />,
       title: "Candidates",
       description: "Maintain a dynamic professional profile, track projects using interactive Markdown descriptions, and generate tailored CV snapshots for accessible open positions."
     },
@@ -40,61 +41,61 @@ export const About: React.FC = () => {
       icon: <FaUserTie className="text-primary fs-4" />,
       title: "Recruiters",
       description: "Manage a shared pool of job positions and attributes, customize requirements templates, and leverage full-text search to review candidate pipelines in read-only mode."
-    },
-    {
-      icon: <FaUserShield className="text-danger fs-4" />,
-      title: "Administrators",
-      description: "Unrestricted systemic access with masquerading capabilities to view, audit, and modify any user profile, positions, or roles to maintain platform integrity."
     }
   ];
 
+  const stats = [
+    { icon: <FaUsers className="text-primary fs-3 mb-2" />, count: "10,000+", label: "Verified Candidates" },
+    { icon: <FaBriefcase className="text-primary fs-3 mb-2" />, count: "500+", label: "Active Job Postings" },
+    { icon: <FaClock className="text-primary fs-3 mb-2" />, count: "60%", label: "Reduction in Time-to-Hire" }
+  ];
+
   return (
-    <div className="container py-5">
+    <div className="container py-5" style={{ maxWidth: "1000px" }}>
       {/* Hero Section */}
-      <div className="text-center mb-5 pb-3">
-        <h1 className="fw-bold text-dark display-5">
-          About <span className="text-primary">DynoCV</span>
+      <div className="text-center mb-5">
+        <h1 className="fw-extrabold text-dark display-5 mb-3">
+          About <span className="text-primary fw-bold">DynoCV</span>
         </h1>
-        <p className="text-muted mx-auto fs-5" style={{ maxWidth: "700px" }}>
-          A next-generation web-based recruitment platform built to eliminate repetitive resume building. DynoCV empowers candidates with reusable profiles and provides recruiters with highly structured, automated evaluation tools.
+        <p className="text-muted mx-auto fs-5" style={{ maxWidth: "750px", lineHeight: "1.6" }}>
+          A next-generation web-based recruitment platform built to eliminate repetitive resume building. 
+          DynoCV empowers candidates with reusable profiles and provides recruiters with highly structured, automated evaluation tools.
         </p>
       </div>
 
-      <hr className="my-5" />
-
-      {/* 🚀 Killer Features Section */}
-      <div className="mb-5">
-        <h3 className="fw-bold mb-4 text-center">Platform Killer Features</h3>
+      {/* 🚀 Platform Features Section */}
+      <div className="my-5 pt-4 p-4">
+        <h3 className="fw-bold mb-4 text-center text-dark">Platform Features</h3>
         <div className="row g-4">
           {killerFeatures.map((feature, idx) => (
             <div className="col-md-4" key={idx}>
-              <div className="card h-100 border-0 shadow-sm p-3 text-center bg-white">
-                <div className="mb-3 d-inline-block p-3 bg-light rounded-circle mx-auto">
+              <div className="card h-100 border-0 shadow-sm p-4 text-center bg-white rounded-3">
+                <div className="mb-3 d-inline-block p-3 bg-primary-subtle rounded-circle mx-auto">
                   {feature.icon}
                 </div>
-                <h5 className="fw-bold card-title">{feature.title}</h5>
-                <p className="card-text text-muted small">{feature.description}</p>
+                <h5 className="fw-bold card-title mb-2 text-dark">{feature.title}</h5>
+                <p className="card-text text-muted small mb-0" style={{ lineHeight: "1.5" }}>{feature.description}</p>
               </div>
             </div>
           ))}
         </div>
       </div>
-
-      <hr className="my-5" />
 
       {/* 👥 Role Architecture */}
-      <div className="mb-5">
-        <h3 className="fw-bold mb-4 text-center">Robust Role Architecture</h3>
-        <div className="row g-4">
+      <div className="my-5 pt-4 p-4">
+        <h3 className="fw-bold mb-4 text-center text-dark">Robust Role Architecture</h3>
+        <div className="row g-4 justify-content-center">
           {coreRoles.map((role, idx) => (
-            <div className="col-md-4" key={idx}>
-              <div className="card h-100 border-top border-4 border-dark-subtle shadow-sm">
+            <div className="col-md-6" key={idx}>
+              <div className="card h-100 border-0 shadow-sm p-2 bg-white rounded-3">
                 <div className="card-body">
                   <div className="d-flex align-items-center gap-3 mb-3">
-                    {role.icon}
-                    <h5 className="fw-bold mb-0">{role.title}</h5>
+                    <div className="p-2 bg-primary-subtle rounded-3 text-primary d-flex align-items-center justify-content-center">
+                      {role.icon}
+                    </div>
+                    <h5 className="fw-bold mb-0 text-dark">{role.title}</h5>
                   </div>
-                  <p className="card-text text-muted small">{role.description}</p>
+                  <p className="card-text text-muted small mb-0" style={{ lineHeight: "1.5" }}>{role.description}</p>
                 </div>
               </div>
             </div>
@@ -102,34 +103,48 @@ export const About: React.FC = () => {
         </div>
       </div>
 
-      <hr className="my-5" />
+      {/* 📊 Impact & Stats Section */}
+      <div className="my-5 py-4 p-4 bg-light rounded-3 shadow-sm text-center border-0">
+        <div className="row g-4 justify-content-center">
+          {stats.map((stat, idx) => (
+            <div className="col-md-4 col-sm-6" key={idx}>
+              <div className="p-2">
+                {stat.icon}
+                <h3 className="fw-bold text-dark mb-0">{stat.count}</h3>
+                <span className="text-muted small fw-semibold">{stat.label}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
-      {/* 💻 Technical Specifications */}
-      <div>
-        <h3 className="fw-bold mb-4 text-center">Advanced System Integrity</h3>
-        <div className="row justify-content-center">
+      {/* 🛡️ Enterprise Trust & Security Section */}
+      <div className="my-5 p-4 bg-white border border-light shadow-sm rounded-3">
+        <div className="row align-items-center g-4">
+          <div className="col-md-4 text-center text-md-start ps-md-3">
+            <span className="badge bg-primary-subtle text-primary mb-2 px-3 py-1.5 rounded-pill fw-semibold small">Enterprise Grade</span>
+            <h4 className="fw-bold text-dark mb-2">Data Integrity & Security</h4>
+            <p className="text-muted small mb-0">
+              We ensure that candidate talent profiles and recruiter pipelines are tamper-proof and highly secure.
+            </p>
+          </div>
           <div className="col-md-8">
-            <div className="card bg-dark text-light p-4 shadow">
-              <h5 className="text-primary fw-bold mb-3 d-flex align-items-center gap-2">
-                <FaCode /> Modern Tech Stack Integration
-              </h5>
-              <p className="small text-white-50">
-                DynoCV leverages <strong className="text-light">React (TypeScript)</strong> and <strong className="text-light">Bootstrap</strong> on the frontend for building type-safe, fluid responsive layouts. The enterprise-grade backend is engineered using <strong className="text-light">NestJS</strong>, utilizing <strong className="text-light">Prisma ORM</strong> and <strong className="text-light">PostgreSQL</strong> for highly secure data transactions.
-              </p>
-              
-              <div className="row mt-4 pt-3 border-top border-secondary g-3">
-                <div className="col-md-6 d-flex align-items-start gap-2">
-                  <FaShieldAlt className="text-warning mt-1" />
+            <div className="row g-3">
+              <div className="col-sm-6">
+                <div className="d-flex gap-3 align-items-start p-2">
+                  <div className="text-primary mt-1"><FaLock className="fs-5" /></div>
                   <div>
-                    <h6 className="mb-1 text-light">Optimistic Locking & Auto-Save</h6>
-                    <p className="small text-white-50 mb-0">Profile states are securely continuously tracked locally and auto-saved using an explicit versioning engine to safely intercept data concurrency conflicts.</p>
+                    <h6 className="fw-bold mb-1 text-dark">Immutable Snapshots</h6>
+                    <p className="text-muted small mb-0" style={{ fontSize: "0.85rem" }}>CV metrics are locked in JSON format once submitted, preventing alteration.</p>
                   </div>
                 </div>
-                <div className="col-md-6 d-flex align-items-start gap-2">
-                  <FaDatabase className="text-info mt-1" />
+              </div>
+              <div className="col-sm-6">
+                <div className="d-flex gap-3 align-items-start p-2">
+                  <div className="text-primary mt-1"><FaShieldAlt className="fs-5" /></div>
                   <div>
-                    <h6 className="mb-1 text-light">JSON Data Isolation</h6>
-                    <p className="small text-white-50 mb-0">Dynamic submissions are completely isolated as atomic PostgreSQL Json snapshots, preventing historic CVs from breaking when user profiles change.</p>
+                    <h6 className="fw-bold mb-1 text-dark">Read-Only Pipeline</h6>
+                    <p className="text-muted small mb-0" style={{ fontSize: "0.85rem" }}>Recruiter features strict role-based access control to safeguard privacy.</p>
                   </div>
                 </div>
               </div>
@@ -138,6 +153,18 @@ export const About: React.FC = () => {
         </div>
       </div>
 
+  {/* 🎯 Our Vision Section */}
+<div 
+  className="my-5 p-5 rounded-3 shadow text-center" 
+  style={{ backgroundColor: "#FFF0F5", border: "1px solid #FFE4E1" }} 
+>
+  <h3 className="fw-bold mb-3 text-dark">The Vision Behind DynoCV</h3>
+  <p className="mx-auto text-secondary fs-6 mb-0" style={{ maxWidth: "750px", lineHeight: "1.7", fontSize: "0.95rem" }}>
+    Traditional recruitment is broken by repetitive applications and unstructured PDF resumes that ATS software fails to read accurately. 
+    <strong> DynoCV</strong> bridges this gap by turning static resumes into structural, queryable data models. 
+    We make hiring completely transparent, data-driven, and lightning-fast for global-scale enterprises and scaling startups alike.
+  </p>
+</div>
     </div>
   );
 };
