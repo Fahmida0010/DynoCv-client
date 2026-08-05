@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { FaBriefcase, FaEye, FaFileMedical, FaSearch, FaThumbsUp, FaRegThumbsUp } from "react-icons/fa";
 import useAxiosSecure from "../../../hooks/useAxiossecure";
 import Swal from "sweetalert2";
-import Loading from "../../../components/Loader/loading";
 
 interface Position {
   id: string;
@@ -49,11 +48,11 @@ export const AvailablePositions: React.FC = () => {
     fetchData();
   }, [axiosSecure]);
 
-  // ❤️ লাইক দেওয়ার ডাইনামিক ফাংশন
+  // ❤️ লাইক দেওয়ার ডাইনামিক ফাংশন
   const handleToggleLike = async (positionId: string) => {
     try {
-      // সঠিক প্রোডাকশন রাউট এপিআই কল (404 এরর ফিক্স করার জন্য)
-      const res = await axiosSecure.post(`positions/${positionId}/like`);
+      // 'const res =' সরিয়ে শুধু এপিআই কলটি রাখা হয়েছে
+      await axiosSecure.post(`positions/${positionId}/like`);
       
       // লাইক সাকসেসফুল হলে ফ্রন্টএন্ড স্টেট আপডেট করা
       setPositions((prevPositions) =>
@@ -213,7 +212,7 @@ export const AvailablePositions: React.FC = () => {
       <div className="row">
         {filteredPositions.length > 0 ? (
           filteredPositions.map((pos) => {
-            // চেক করা ইউজার অলরেডি লাইক দিয়েছে কিনা
+            // চেক করা ইউজার অলরেডি লাইক দিয়েছে কিনা
             const hasLiked = pos.likes?.some((like) => like.userId === currentUserId);
 
             return (
