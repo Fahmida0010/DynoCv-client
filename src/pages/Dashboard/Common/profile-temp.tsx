@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import business from "../../../assets/business.jpg";
 import Swal from "sweetalert2";
+import useAxiosSecure from "../../../hooks/useAxiossecure";
 
 export const Profile = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  
+  const axiosSecure = useAxiosSecure();
+
   // Profile & Dynamic Attributes States
   const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -15,6 +17,8 @@ export const Profile = () => {
   // Modal Control States
   const [showProfileModal, setShowProfileModal] = useState<boolean>(false);
   const [showPasswordModal, setShowPasswordModal] = useState<boolean>(false);
+  const [showSalesforceModal, setShowSalesforceModal] = useState<boolean>(false);
+  const [sfLoading, setSfLoading] = useState<boolean>(false);
 
   // Form Field States
   const [editForm, setEditForm] = useState({
@@ -33,34 +37,33 @@ export const Profile = () => {
     newPassword: "",
   });
 
-  const API_URL = import.meta.env.VITE_API_URL;
+  // Salesforce Form State
+  const [salesforceForm, setSalesforceForm] = useState({
+    companyName: "",
+    phone: "",
+    description: "",
+  });
 
-  // ১. ইউজার আইডি অনুসারে বেসিক প্রোফাইল ও ডায়নামিক অ্যাট্রিবিউটস নিয়ে আসার মেথড
   const loadCompleteProfile = async () => {
     if (!user) return;
     try {
       setLoading(true);
-      const token = localStorage.getItem("token"); // Auth টোকেন নিশ্চিত করুন
 
-      // বেসিক প্রোফাইল ডেটা ফেচ
-      const profileRes = await fetch(`${API_URL}/profile/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const profile = await profileRes.json();
+      // axiosSecure axios instance ব্যবহার করায় .data থেকে রেজাল্ট আসবে
+      const profileRes = await axiosSecure.get("/profile/me");
+      const profile = profileRes.data;
 
-      // ডাইনামিক ইউজার অ্যাট্রিবিউটস (bio, tech stack ইত্যাদি) ফেচ
-      const attrRes = await fetch(`${API_URL}/profile/attributes`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const attributes = await attrRes.json();
+      const attrRes = await axiosSecure.get("/profile/attributes");
+      const attributes = attrRes.data;
 
-      // অবজেক্ট ম্যাপ তৈরি করে ডাটা স্ট্রাকচার ফিল্টার করা
       const attrMap: any = {};
-      attributes.forEach((item: any) => {
-        if (item.attribute && item.attribute.label) {
-          attrMap[item.attribute.label.toLowerCase()] = item.value;
-        }
-      });
+      if (Array.isArray(attributes)) {
+        attributes.forEach((item: any) => {
+          if (item.attribute && item.attribute.label) {
+            attrMap[item.attribute.label.toLowerCase()] = item.value;
+          }
+        });
+      }
 
       const fullData = {
         ...profile,
@@ -72,7 +75,6 @@ export const Profile = () => {
 
       setProfileData(fullData);
 
-      // ফর্ম স্টেটে ডাটা সেট করা (যাতে মডাল ওপেন করলে আগের ডাটা দেখা যায়)
       setEditForm({
         firstName: fullData.firstName || user.firstName || "",
         lastName: fullData.lastName || user.lastName || "",
@@ -84,6 +86,10 @@ export const Profile = () => {
         jobPreference: fullData.jobPreference,
       });
 
+      setSalesforceForm((prev) => ({
+        ...prev,
+        description: fullData.bio || "",
+      }));
     } catch (err: any) {
       console.error("Failed to load profile context:", err);
     } finally {
@@ -116,21 +122,11 @@ export const Profile = () => {
   const isRecruiter = user.role === "RECRUITER";
   const isAdmin = user.role === "ADMIN";
 
-  // ২. প্রোফাইল আপডেট সাবমিট হ্যান্ডলার (Swal সহ)
+  // ২. প্রোফাইল আপডেট সাবমিট হ্যান্ডলার (axiosSecure ব্যবহার করা হয়েছে)
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${API_URL}/profile/update`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(editForm),
-      });
-
-      if (!response.ok) throw new Error("Failed to modify user profile details");
+      await axiosSecure.put("/profile/update", editForm);
 
       Swal.fire({
         icon: "success",
@@ -139,27 +135,21 @@ export const Profile = () => {
         showConfirmButton: false,
       });
       setShowProfileModal(false);
-      loadCompleteProfile(); // নতুন ডেটা রি-লোড
+      loadCompleteProfile();
     } catch (err: any) {
-      Swal.fire({ icon: "error", title: "Error", text: err.message });
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: err.response?.data?.message || err.message,
+      });
     }
   };
 
-  // ৩. পাসওয়ার্ড পরিবর্তন সাবমিট হ্যান্ডলার (Swal সহ)
+  // ৩. পাসওয়ার্ড পরিবর্তন সাবমিট হ্যান্ডলার (axiosSecure ব্যবহার করা হয়েছে)
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${API_URL}/profile/change-password`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(passwordForm),
-      });
-
-      if (!response.ok) throw new Error("Current password mismatch or invalid input");
+      await axiosSecure.put("/profile/change-password", passwordForm);
 
       Swal.fire({
         icon: "success",
@@ -171,7 +161,48 @@ export const Profile = () => {
       setShowPasswordModal(false);
       setPasswordForm({ oldPassword: "", newPassword: "" });
     } catch (err: any) {
-      Swal.fire({ icon: "error", title: "Security Alert", text: err.message });
+      Swal.fire({
+        icon: "error",
+        title: "Security Alert",
+        text: err.response?.data?.message || "Current password mismatch or invalid input",
+      });
+    }
+  };
+
+  // ৪. Salesforce CRM ইম্পোর্ট/সিংকিং হ্যান্ডলার
+  const handleSalesforceSync = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSfLoading(true);
+
+    try {
+      const payload = {
+        firstName: profileData?.firstName || user.firstName || "User",
+        lastName: profileData?.lastName || user.lastName || "Name",
+        email: user.email,
+        companyName: salesforceForm.companyName,
+        phone: salesforceForm.phone,
+        description: salesforceForm.description,
+      };
+
+      const response = await axiosSecure.post("/salesforce/sync", payload);
+      const data = response.data;
+
+      Swal.fire({
+        icon: "success",
+        title: "Synced with Salesforce!",
+        text: `Account ID: ${data.accountId} | Contact ID: ${data.contactId}`,
+      });
+
+      setShowSalesforceModal(false);
+      setSalesforceForm({ companyName: "", phone: "", description: "" });
+    } catch (err: any) {
+      Swal.fire({
+        icon: "error",
+        title: "Salesforce Integration Error",
+        text: err.response?.data?.message || err.message,
+      });
+    } finally {
+      setSfLoading(false);
     }
   };
 
@@ -221,11 +252,11 @@ export const Profile = () => {
 
           <hr className="my-4" />
 
-          {/* ৪. ক্যান্ডিডেটের ডাইনামিক অ্যাট্রিবিউট ডেটা প্রোফাইল পেজে প্রদর্শন */}
+          {/* ক্যান্ডিডেটের ডাইনামিক অ্যাট্রিবিউট ডেটা প্রোফাইল পেজে প্রদর্শন */}
           {isCandidate && profileData && (
             <div className="text-start bg-light p-4 rounded-3 mb-4 mx-md-4 border border-light-subtle">
               <h5 className="fw-bold mb-3 text-dark border-bottom pb-2">Professional Specifications</h5>
-              
+
               <div className="mb-3">
                 <h6 className="fw-bold text-primary mb-1">Biography / About</h6>
                 <p className="text-muted mb-0">{profileData.bio || "No summary added yet."}</p>
@@ -246,7 +277,7 @@ export const Profile = () => {
                   <h6 className="fw-bold text-primary mb-1">Job Preference</h6>
                   <p className="mb-0">
                     <span className="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1">
-                      {profileData.jobPreference.replace("_", " ")}
+                      {profileData.jobPreference ? profileData.jobPreference.replace("_", " ") : "N/A"}
                     </span>
                   </p>
                 </div>
@@ -276,6 +307,11 @@ export const Profile = () => {
 
             <button className="btn btn-outline-secondary px-4" onClick={() => setShowPasswordModal(true)}>
               <i className="bi bi-key me-2"></i> Change Password
+            </button>
+
+            {/* Salesforce Integration Action (Accessible for any user or admin) */}
+            <button className="btn btn-info text-white px-4" onClick={() => setShowSalesforceModal(true)}>
+              <i className="bi bi-cloud-arrow-up-fill me-2"></i> Sync to Salesforce CRM
             </button>
 
             {isRecruiter && (
@@ -316,7 +352,6 @@ export const Profile = () => {
                       <input type="url" className="form-control" placeholder="Image web link" value={editForm.photoUrl} onChange={(e) => setEditForm({ ...editForm, photoUrl: e.target.value })} />
                     </div>
 
-                    {/* ক্যান্ডিডেটের জন্য এক্সট্রা ডাটা ইনপুটস */}
                     {isCandidate && (
                       <>
                         <div className="col-12">
@@ -377,6 +412,76 @@ export const Profile = () => {
                 <div className="modal-footer bg-light">
                   <button type="button" className="btn btn-secondary" onClick={() => setShowPasswordModal(false)}>Close</button>
                   <button type="submit" className="btn btn-dark px-4">Commit Update</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* -------------------- ৩. SALESFORCE CRM INTEGRATION MODAL -------------------- */}
+      {showSalesforceModal && (
+        <div className="modal show d-block" tabIndex={-1} style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content border-0 shadow rounded-3">
+              <div className="modal-header bg-info text-white">
+                <h5 className="modal-title fw-bold">Sync Profile with Salesforce CRM</h5>
+                <button type="button" className="btn-close btn-close-white" onClick={() => setShowSalesforceModal(false)}></button>
+              </div>
+              <form onSubmit={handleSalesforceSync}>
+                <div className="modal-body p-4">
+                  <p className="small text-muted mb-3">
+                    This action creates an Account & linked Contact record inside Salesforce for <strong>{user.email}</strong>.
+                  </p>
+
+                  <div className="mb-3">
+                    <label className="form-label small fw-bold text-secondary">Company / Organization Name</label>
+                    <input
+                      type="text"
+                      required
+                      className="form-control"
+                      placeholder="e.g. Acme Corp / Self Employee"
+                      value={salesforceForm.companyName}
+                      onChange={(e) => setSalesforceForm({ ...salesforceForm, companyName: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label small fw-bold text-secondary">Contact Phone Number</label>
+                    <input
+                      type="tel"
+                      className="form-control"
+                      placeholder="+8801700000000"
+                      value={salesforceForm.phone}
+                      onChange={(e) => setSalesforceForm({ ...salesforceForm, phone: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label small fw-bold text-secondary">Account Description / Notes</label>
+                    <textarea
+                      className="form-control"
+                      rows={3}
+                      placeholder="Additional details for CRM notes..."
+                      value={salesforceForm.description}
+                      onChange={(e) => setSalesforceForm({ ...salesforceForm, description: e.target.value })}
+                    ></textarea>
+                  </div>
+                </div>
+                <div className="modal-footer bg-light">
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowSalesforceModal(false)}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn btn-info text-white px-4" disabled={sfLoading}>
+                    {sfLoading ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                        Syncing...
+                      </>
+                    ) : (
+                      "Send to Salesforce"
+                    )}
+                  </button>
                 </div>
               </form>
             </div>
