@@ -34,7 +34,7 @@ const DashboardLayout: React.FC = () => {
   const location = useLocation();
   const axiosSecure = useAxiosSecure();
 
-  // ডাটাবেজ থেকে ইউজারের রোল এবং ডিটেইলস ফেচ করা
+  
   const { data: dbUser, isLoading } = useQuery<DBUser>({
     queryKey: ["dbUser", user?.email],
     enabled: !!user?.email && !loading,
@@ -60,7 +60,7 @@ const DashboardLayout: React.FC = () => {
   if (loading || isLoading) return <Loading />;
   if (!user) return null;
 
-  // মেনু আইটেম সেটআপ
+  
   const candidateMenu: MenuItem[] = [
     
     { label: "Profile", path: "/dashboard/profile", icon: <FaUser /> },
@@ -100,7 +100,7 @@ return (
     <div className="d-flex flex-column min-vh-100 bg-light">
       <Navbar />
 
-      {/* মোবাইল ডিভাইসের জন্য ফ্লোটিং টগল বাটন */}
+    
       <div className="d-md-none p-3 bg-white border-bottom d-flex justify-content-between align-items-center">
         <h5 className="m-0 fw-bold text-dark text-capitalize">
           {location.pathname.split("/").pop()?.replace("-", " ") || "Dashboard"}
@@ -115,7 +115,7 @@ return (
 
       <div className="d-flex flex-grow-1 position-relative">
         
-        {/* সাইডবার ব্যাকড্রপ / ওভারলে (শুধুমাত্র মোবাইলে সাইডবার খোলা থাকলে মেইন কন্টেন্ট ঝাপসা বা লক করার জন্য) */}
+      
         {sidebarOpen && (
           <div 
             className="d-md-none position-fixed top-0 start-0 w-100 h-100" 
@@ -124,8 +124,7 @@ return (
           />
         )}
 
-        {/* সাইডবার (aside) */}
-        {/* মোবাইলে এটিকে position-fixed এবং ডেস্কটপে position-relative এ রূপান্তর করা হয়েছে */}
+      
         <aside 
           className={`bg-white text-dark d-flex flex-column shadow ${
             sidebarOpen ? "d-flex" : "d-none d-md-flex"
@@ -137,10 +136,10 @@ return (
             height: "100%",
             zIndex: 1040,
             left: 0,
-            top: window.innerWidth < 768 ? "57px" : "auto" // মোবাইলে টপবারের নিচে থাকবে
+            top: window.innerWidth < 768 ? "57px" : "auto" 
           }}
         >
-          {/* সাইডবার হেডার (ডেস্কটপ মোডে টগল বাটন) */}
+          
           <div className="p-3 d-none d-md-flex justify-content-between align-items-center border-bottom border-light">
             {sidebarOpen && <span className="fw-bold text-primary tracking-wider">Dashboard</span>}
             <button 
@@ -151,7 +150,7 @@ return (
             </button>
           </div>
 
-          {/* নেভিগেশন মেনু */}
+        
           <nav className="flex-grow-1 overflow-auto py-3 px-2">
             <ul className="nav nav-pills flex-column gap-2 list-unstyled">
               {menuItems.map((item) => {
@@ -178,7 +177,7 @@ return (
             </ul>
           </nav>
 
-          {/* ইউজার প্রোফাইল ফুটনোট */}
+      
           {sidebarOpen && (
             <div className="p-3 border-top border-light bg-light mt-auto">
               <div className="d-flex align-items-center gap-3">
@@ -197,20 +196,18 @@ return (
           )}
         </aside>
 
-        {/* মেইন কন্টেন্ট এরিয়া */}
-        {/* w-100 এবং overflow-hidden যুক্ত করা হয়েছে যাতে স্ক্রিনের বাইরে কনটেন্ট না যায় */}
+      
         <main className="flex-grow-1 p-2 p-sm-3 p-md-5 bg-light overflow-hidden w-100">
           <div className="container-fluid px-0 px-md-2">
             
-            {/* পেজ টাইটেল হেডার */}
+      
             <div className="d-none d-md-block mb-4">
                <h2 className="fw-bold text-dark text-capitalize m-0">
                  {location.pathname.split("/").pop()?.replace("-", " ") || "Dashboard"}
                </h2>
             </div>
             
-            {/* চাইল্ড কম্পোনেন্ট রেন্ডারিং এরিয়া */}
-            {/* মোবাইলে অতিরিক্ত প্যাডিং কমানো হয়েছে (p-2 p-md-4) */}
+        
             <div className="bg-white rounded shadow-sm p-2 p-md-4" style={{ minHeight: "calc(100vh - 240px)" }}>
               <Outlet />
             </div>
@@ -220,7 +217,7 @@ return (
 
       <Footer />
 
-      {/* কাস্টম সিএসএস হোভার স্টাইল */}
+    
       <style>{`
         .hover-bg-custom:hover {
           background-color: rgba(0, 0, 0, 0.05) !important;
