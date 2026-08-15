@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import useAxiosSecure from "../../hooks/useAxiossecure";
 
 interface CVData {
   id: string;
@@ -25,13 +25,13 @@ interface CVData {
 const LatestCV: React.FC = () => {
   const [cvs, setCvs] = useState<CVData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const axiosSecure = useAxiosSecure();
 
   useEffect(() => {
-    // এখানে আপনার প্রজেক্টের আসল ব্যাকএন্ড বেস ইউআরএল (যেমন: http://localhost:5000/api/) চেক করে বসিয়ে দিন
-    axios
-      .get("http://localhost:5000/api/dashboard/my-cvs/latest?limit=3") 
+    axiosSecure
+      .get("/dashboard/my-cvs/latest?limit=3") 
       .then((res) => {
-        // রেসপন্স ডাটা অ্যারে কিনা চেক করা হচ্ছে, অবজেক্ট হলে .data প্রোপার্টি থেকে অ্যারে খোঁজা হচ্ছে
+      
         const incomingData = Array.isArray(res.data)
           ? res.data
           : (res.data?.data && Array.isArray(res.data.data) ? res.data.data : []);
@@ -41,10 +41,10 @@ const LatestCV: React.FC = () => {
       })
       .catch((err) => {
         console.error("Error fetching latest CVs:", err);
-        setCvs([]); // এরর হলেও অ্যাপ ক্র্যাশ করবে না, খালি অ্যারে সেট হবে
+        setCvs([]); 
         setLoading(false);
       });
-  }, []); // ডিপেনডেন্সি অ্যারে ক্লিন রাখা হলো
+  }, []); 
 
   if (loading) {
     return (
@@ -105,7 +105,7 @@ const LatestCV: React.FC = () => {
               cvs.map((cv) => {
                 const fullName = `${cv.user?.firstName || ""} ${cv.user?.lastName || ""}`;
                 
-                // JSON কনটেন্টে প্রজেক্টের যে ট্যাগগুলো আছে সেগুলোকে স্কিলস হিসেবে স্ট্রিং বানানোর লজিক
+            
                 const allTags = cv.content?.projects?.flatMap(p => p.tags) || [];
                 const distinctTags = Array.from(new Set(allTags)).slice(0, 4); 
                 const skillsDisplay = distinctTags.length > 0 ? distinctTags.join(" • ") : "Custom Compiled Attributes";
@@ -136,9 +136,7 @@ const LatestCV: React.FC = () => {
                           </p>
                         </div>
 
-                        <button className="btn btn-outline-primary w-100 mt-3">
-                          View CV
-                        </button>
+                      
                       </div>
                     </div>
                   </div>
