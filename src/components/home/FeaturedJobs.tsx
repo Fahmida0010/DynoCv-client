@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FaBriefcase, FaEye, FaFileMedical } from "react-icons/fa";
+import { FaBriefcase, FaFileMedical } from "react-icons/fa";
 import Swal from "sweetalert2";
 import useAxiosSecure from "../../hooks/useAxiossecure";
 
