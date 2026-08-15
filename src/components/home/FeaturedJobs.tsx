@@ -27,7 +27,7 @@ export const FeaturedJobs: React.FC = () => {
       .get("positions")
       .then((res) => {
         const activePositions = res.data.filter((pos: Position) => pos.isActive);
-        
+
         setPositions(activePositions.slice(0, 4));
         setLoading(false);
       })
@@ -57,7 +57,7 @@ export const FeaturedJobs: React.FC = () => {
       const projectsData = projectsRes.data;
 
       const requiredAttributeIds = position.templates.map((t) => t.attribute.id);
-      
+
       const filteredAttributes = userAttributes.filter((attr: any) =>
         requiredAttributeIds.includes(attr.attributeId)
       );
@@ -89,11 +89,10 @@ export const FeaturedJobs: React.FC = () => {
             <p class="text-muted">📍 ${cvSnapshot.me.location}</p>
             <hr/>
             <h6><strong>Position Specific Attributes:</strong></h6>
-            ${
-              cvSnapshot.info.length > 0
-                ? cvSnapshot.info.map((i: any) => `<p><strong>${i.label}:</strong> ${i.value}</p>`).join("")
-                : "<p class='text-muted small'>No custom attributes required for this role.</p>"
-            }
+            ${cvSnapshot.info.length > 0
+            ? cvSnapshot.info.map((i: any) => `<p><strong>${i.label}:</strong> ${i.value}</p>`).join("")
+            : "<p class='text-muted small'>No custom attributes required for this role.</p>"
+          }
             <hr/>
             <h6><strong>Included Projects:</strong></h6>
             ${cvSnapshot.projects.map((p: any) => `<div><strong>${p.name}</strong><br/><small>${p.tags.join(", ")}</small></div>`).join("<br/>")}
@@ -110,7 +109,7 @@ export const FeaturedJobs: React.FC = () => {
           try {
             await axiosSecure.post("dashboard/my-cvs", {
               positionId: position.id,
-              content: cvSnapshot, 
+              content: cvSnapshot,
             });
 
             Swal.fire({
@@ -170,8 +169,8 @@ export const FeaturedJobs: React.FC = () => {
                       <FaBriefcase className="text-primary" /> {pos.title}
                     </h5>
                     <p className="card-text text-muted small mt-2">
-                      {pos.description.length > 150 
-                        ? `${pos.description.substring(0, 150)}...` 
+                      {pos.description.length > 150
+                        ? `${pos.description.substring(0, 150)}...`
                         : pos.description}
                     </p>
 
@@ -185,9 +184,6 @@ export const FeaturedJobs: React.FC = () => {
                   </div>
 
                   <div className="d-flex justify-content-end gap-2 mt-3 pt-3 border-top">
-                    <button className="btn btn-sm btn-light border d-flex align-items-center gap-1">
-                      <FaEye /> Details
-                    </button>
                     <button
                       className="btn btn-sm btn-primary d-flex align-items-center gap-1"
                       onClick={() => handleApplyPosition(pos)}

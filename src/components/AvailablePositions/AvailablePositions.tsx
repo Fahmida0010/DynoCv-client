@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FaBriefcase, FaEye, FaFileMedical, FaSearch, FaThumbsUp } from "react-icons/fa";
+import { FaBriefcase, FaFileMedical, FaSearch, FaThumbsUp } from "react-icons/fa";
 import Swal from "sweetalert2";
 import useAxiosSecure from "../../hooks/useAxiossecure";
 
@@ -8,7 +8,7 @@ interface Position {
   title: string;
   description: string;
   isActive: boolean;
-  likesCount?: number; 
+  likesCount?: number;
   isLikedByUser?: boolean;
   templates: Array<{
     attribute: {
@@ -45,7 +45,6 @@ export const AvailablePositions: React.FC = () => {
       const response = await axiosSecure.post(`positions/${positionId}/like`);
       const { liked } = response.data;
 
-      // লোকাল স্টেট আপডেট যাতে রিয়েল-টাইমে UI-তে লাইক কাউন্ট বাড়ে/কমে
       setPositions((prevPositions) =>
         prevPositions.map((pos) => {
           if (pos.id === positionId) {
@@ -89,7 +88,7 @@ export const AvailablePositions: React.FC = () => {
       const projectsData = projectsRes.data;
 
       const requiredAttributeIds = position.templates.map((t) => t.attribute.id);
-      
+
       const filteredAttributes = userAttributes.filter((attr: any) =>
         requiredAttributeIds.includes(attr.attributeId)
       );
@@ -116,19 +115,24 @@ export const AvailablePositions: React.FC = () => {
       Swal.fire({
         title: `Tailored CV Preview`,
         html: `
-          <div style="text-align: left; max-height: 400px; overflow-y: auto; padding: 10px; border: 1px solid #eee;">
-            <h5 style="color:#0d6efd;">${cvSnapshot.me.firstName} ${cvSnapshot.me.lastName}</h5>
-            <p class="text-muted">📍 ${cvSnapshot.me.location}</p>
+          <div style="text-align: left; max-height: 400px; overflow-y: auto; padding: 12px; border: 1px solid #e9ecef; border-radius: 8px; background-color: #f8f9fa;">
+            <h5 style="color:#0d6efd; margin-bottom: 2px;">${cvSnapshot.me.firstName} ${cvSnapshot.me.lastName}</h5>
+            <p class="text-muted small">📍 ${cvSnapshot.me.location}</p>
             <hr/>
             <h6><strong>Position Specific Attributes:</strong></h6>
             ${
               cvSnapshot.info.length > 0
-                ? cvSnapshot.info.map((i: any) => `<p><strong>${i.label}:</strong> ${i.value}</p>`).join("")
+                ? cvSnapshot.info.map((i: any) => `<p class="mb-1"><strong>${i.label}:</strong> ${i.value}</p>`).join("")
                 : "<p class='text-muted small'>No custom attributes required for this role.</p>"
             }
             <hr/>
             <h6><strong>Included Projects:</strong></h6>
-            ${cvSnapshot.projects.map((p: any) => `<div><strong>${p.name}</strong><br/><small>${p.tags.join(", ")}</small></div>`).join("<br/>")}
+            ${cvSnapshot.projects
+              .map(
+                (p: any) =>
+                  `<div class="mb-2"><strong>${p.name}</strong><br/><small class="text-muted">${p.tags.join(", ")}</small></div>`
+              )
+              .join("")}
           </div>
         `,
         icon: "info",
@@ -142,7 +146,7 @@ export const AvailablePositions: React.FC = () => {
           try {
             await axiosSecure.post("dashboard/my-cvs", {
               positionId: position.id,
-              content: cvSnapshot, 
+              content: cvSnapshot,
             });
 
             Swal.fire({
@@ -172,87 +176,114 @@ export const AvailablePositions: React.FC = () => {
     }
   };
 
-  const filteredPositions = positions.filter((pos) =>
-    pos.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    pos.description.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredPositions = positions.filter(
+    (pos) =>
+      pos.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      pos.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading) {
-    return (
-      <div className="text-center p-5">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="container-fluid px-3 py-4">
+    <div className="container-fluid px-3 px-md-4 py-4">
+      {/* Header Section */}
       <div className="mb-4">
-        <h2 className="fw-bold text-dark">Available Positions</h2>
+        <h2 className="fw-bold text-dark mb-1">Available Positions</h2>
         <p className="text-muted">Browse active recruitment positions and create tailored profiles.</p>
       </div>
 
       {/* Search Filter Bar */}
-      <div className="input-group mb-4" style={{ maxWidth: "400px" }}>
+      <div className="input-group mb-4 shadow-sm rounded" style={{ maxWidth: "420px" }}>
+        <span className="input-group-text bg-white border-end-0 text-muted">
+          <FaSearch />
+        </span>
         <input
           type="text"
-          className="form-control"
-          placeholder="Search positions..."
+          className="form-control border-start-0 ps-0 shadow-none"
+          placeholder="Search positions by title or description..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <button className="btn btn-outline-secondary" type="button">
-          <FaSearch />
-        </button>
       </div>
 
       {/* Positions Grid */}
-      <div className="row">
-        {filteredPositions.length > 0 ? (
-          filteredPositions.map((pos) => (
-            <div className="col-12 col-md-6 col-lg-4 mb-4" key={pos.id}>
-              <div className="card h-100 border-start border-primary border-4 shadow-sm">
-                <div className="card-body d-flex flex-column justify-content-between">
+      <div className="row g-4">
+        {loading ? (
+          // Skeleton Loading UI (6 Cards)
+          Array.from({ length: 6 }).map((_, idx) => (
+            <div className="col-12 col-md-6 col-lg-4" key={idx}>
+              <div className="card h-100 border-0 shadow-sm p-3" aria-hidden="true">
+                <div className="card-body p-0 d-flex flex-column justify-content-between">
                   <div>
-                    <div className="d-flex justify-content-between align-items-start gap-2">
-                      <h5 className="card-title fw-bold text-dark d-flex align-items-center gap-2 mb-0">
-                        <FaBriefcase className="text-muted flex-shrink-0" /> {pos.title}
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                      <span className="placeholder col-7 placeholder-lg rounded"></span>
+                      <span className="placeholder col-2 placeholder-lg rounded-pill"></span>
+                    </div>
+                    <p className="card-text placeholder-glow mb-3">
+                      <span className="placeholder col-11 rounded mb-1"></span>
+                      <span className="placeholder col-8 rounded mb-1"></span>
+                      <span className="placeholder col-5 rounded"></span>
+                    </p>
+                    <div className="d-flex gap-1 mb-3">
+                      <span className="placeholder col-3 placeholder-sm rounded-pill"></span>
+                      <span className="placeholder col-3 placeholder-sm rounded-pill"></span>
+                      <span className="placeholder col-2 placeholder-sm rounded-pill"></span>
+                    </div>
+                  </div>
+                  <div className="pt-3 border-top d-flex justify-content-end">
+                    <span className="placeholder col-6 placeholder-lg rounded-3"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))
+        ) : filteredPositions.length > 0 ? (
+          filteredPositions.map((pos) => (
+            <div className="col-12 col-md-6 col-lg-4" key={pos.id}>
+              <div className="card h-100 border-0 shadow-sm rounded-3 hover-shadow transition-all">
+                <div className="card-body p-4 d-flex flex-column justify-content-between">
+                  <div>
+                    {/* Header: Title & Like Button */}
+                    <div className="d-flex justify-content-between align-items-start gap-2 mb-2">
+                      <h5 className="card-title fw-bold text-dark d-flex align-items-center gap-2 mb-0 fs-6">
+                        <FaBriefcase className="text-primary flex-shrink-0" /> {pos.title}
                       </h5>
-                      
-                      {/* লাইক বাটন ইন্টারফেস */}
+
+                      {/* Like Button */}
                       <button
                         onClick={() => handleToggleLike(pos.id)}
-                        className={`btn btn-sm d-inline-flex align-items-center gap-1.5 border rounded-pill px-2.5 py-1 transition-all ${
-                          pos.isLikedByUser 
-                            ? "btn-primary border-primary text-white" 
-                            : "btn-light border-secondary-subtle text-secondary"
+                        className={`btn btn-sm d-inline-flex align-items-center gap-1 border-0 rounded-pill px-3 py-1 transition-all ${
+                          pos.isLikedByUser
+                            ? "bg-primary text-white shadow-sm"
+                            : "bg-light text-secondary hover-bg-secondary"
                         }`}
                         title={pos.isLikedByUser ? "Unlike this position" : "Like this position"}
                       >
-                        <FaThumbsUp />
+                        <FaThumbsUp className={pos.isLikedByUser ? "text-white" : "text-secondary"} />
                         <span className="fw-semibold small">{pos.likesCount || 0}</span>
                       </button>
                     </div>
 
-                    <p className="card-text text-muted small mt-3 mb-3">{pos.description}</p>
+                    {/* Description */}
+                    <p className="card-text text-secondary small mt-2 mb-3 lh-sm">
+                      {pos.description}
+                    </p>
 
-                    <div className="mb-3 d-flex flex-wrap gap-1">
+                    {/* Attribute Badges */}
+                    <div className="mb-3 d-flex flex-wrap gap-1.5">
                       {pos.templates.map((t, idx) => (
-                        <span key={idx} className="badge bg-light text-dark border">
+                        <span
+                          key={idx}
+                          className="badge bg-light text-secondary border border-light-subtle rounded-pill fw-normal px-2.5 py-1"
+                        >
                           {t.attribute.label}
                         </span>
                       ))}
                     </div>
                   </div>
 
-                  <div className="d-flex justify-content-end gap-2 mt-3 pt-3 border-top">
-                    <button className="btn btn-sm btn-light border d-flex align-items-center gap-1">
-                      <FaEye /> Details
-                    </button>
+                  {/* Card Action */}
+                  <div className="pt-3 border-top mt-auto">
                     <button
-                      className="btn btn-sm btn-primary d-flex align-items-center gap-1"
+                      className="btn btn-success btn-sm w-100 py-2 d-flex align-items-center justify-content-center gap-2 fw-medium shadow-sm"
                       onClick={() => handleApplyPosition(pos)}
                     >
                       <FaFileMedical /> Apply / Create CV
@@ -263,7 +294,9 @@ export const AvailablePositions: React.FC = () => {
             </div>
           ))
         ) : (
-          <div className="col-12 text-center p-5 text-muted">No active positions match your criteria.</div>
+          <div className="col-12 text-center py-5">
+            <div className="text-muted fs-5">No active positions match your criteria.</div>
+          </div>
         )}
       </div>
     </div>

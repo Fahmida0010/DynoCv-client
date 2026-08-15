@@ -34,13 +34,13 @@ const Footer = () => {
             </h5>
             <ul className="list-unstyled d-flex flex-column gap-2">
               <li>
-                <a href="/home" className="text-secondary text-decoration-none hover-link">Home</a>
+                <a href="/" className="text-secondary text-decoration-none hover-link">Home</a>
               </li>
               <li>
-                <a href="/positions" className="text-secondary text-decoration-none hover-link">Positions</a>
+                <a href="/available-positions" className="text-secondary text-decoration-none hover-link">Positions</a>
               </li>
               <li>
-                <a href="/profile" className="text-secondary text-decoration-none hover-link">Profile</a>
+                <a href="/dashboard/profile" className="text-secondary text-decoration-none hover-link">Profile</a>
               </li>
               <li>
                 <a href="/about" className="text-secondary text-decoration-none hover-link">About</a>

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // আপনার সঠিক পাথ দিন
+import { useAuth } from '../context/AuthContext'; 
 import Loading from '../components/Loader/loading';
 
 export const SocialSuccess = () => {
